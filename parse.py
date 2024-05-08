@@ -1,6 +1,7 @@
 import os
 import re
 import json
+import globals
 from bs4 import BeautifulSoup as BS
 
 def build_index(directories):
