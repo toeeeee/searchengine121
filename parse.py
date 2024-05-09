@@ -4,10 +4,17 @@ import json
 import globals
 from bs4 import BeautifulSoup as BS
 
-def build_index(directories):
+def build_index(directories: str) -> None:
+    """
+    Given a path to a root directory, iterate over every file in every subdirectory to get each page's plain text contents
+
+    Parameter(s)
+    directories: str object, path to the root dir
+
+    Return
+    None
     """
     
-    """
     index = {}
     ID = 0
     for root, dirs, files in os.walk(directories):  # traverse dirs & get files at all levels

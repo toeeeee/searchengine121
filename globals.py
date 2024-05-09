@@ -2,7 +2,16 @@
 This document holds all the global variables needed for our search engine
 """
 
-FREQ_DICT = {}  # dict that holds all words encountered and the frequency of encounters
+"""
+DOCID: a counter variable of the number of documents visited and processed so far.
+The ith page processed will be assigned the DOCID i.
+"""
+DOCID = 0
+
+"""
+FREQ_DICT: dict that holds all words encountered and the frequency of encounters
+"""
+FREQ_DICT = {}
 
 """
 INVERTED_INDEX_MAP: a map with the token as a key and a list of its corresponding postings
