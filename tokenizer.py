@@ -124,5 +124,5 @@ def check_for_duplicates(text: str) -> bool:
 
 
 if __name__ == '__main__':
-    print( tokenize("i can't believe it's may 7th, and we're still waiting for the sun to shine. asdf-qwer zxcv/tyui") )
+    # print( tokenize("i can't believe it's may 7th, and we're still waiting for the sun to shine. asdf-qwer zxcv/tyui") )
     pass
