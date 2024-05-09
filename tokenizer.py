@@ -81,7 +81,7 @@ def tokenize(parsed_text: str) -> tuple:
     return (globals.DOCID, tokens_list)
 
 
-def check_for_duplicates(text: str, url: str) -> bool:
+def check_for_duplicates(text: str) -> bool:
     """
     check if the current page is an exact duplicate of other pages already visited. Does so by creating a sha256 hash object of the text, 
 
@@ -94,7 +94,6 @@ def check_for_duplicates(text: str, url: str) -> bool:
     """
     
     hash = hashlib.sha256(text.encode()).hexdigest()  # generate the sha256 hash of the given text
-    file = open('hashes.txt', 'a')  # open the txt file that the hashes will be written into
     # create a connection to the database 'hashes.db' (creates the db if it doesn't already exist)
     con = sqlite3.connect("hashes.db")
     # Create a db cursor to execute SQL statements and fetch results from SQL queries
@@ -110,18 +109,14 @@ def check_for_duplicates(text: str, url: str) -> bool:
     res = cur.execute("SELECT * FROM hashes WHERE hash = ?", (hash,))
     res = res.fetchone()  # if res == anything other than None, it was found in the table
     if res:  # since it's in db, return True: this page is a duplicate of one already crawled over
-        file.write(f"Duplicate -- hash: {hash}\n")
-        file.close()
         cur.close()
         con.close()
         return True
     # otherwise, add its hash to the table
-    cur.execute(f"""INSERT INTO hashes(hash) VALUES(?)""", (hash))
+    cur.execute(f"""INSERT INTO hashes(hash) VALUES(?)""", (hash, ))
     con.commit()  # commit the INSERT transaction to db
 
-    # now write it into 'hashes.txt'
-    file.write(f"Unique -- hash: {hash}\n")
-    file.close()
+    # close connections
     cur.close()
     con.close()
     
@@ -129,5 +124,5 @@ def check_for_duplicates(text: str, url: str) -> bool:
 
 
 if __name__ == '__main__':
-    # print( tokenize("i can't believe it's may 7th, and we're still waiting for the sun to shine. asdf-qwer zxcv/tyui") )
+    print( tokenize("i can't believe it's may 7th, and we're still waiting for the sun to shine. asdf-qwer zxcv/tyui") )
     pass
