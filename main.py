@@ -44,8 +44,8 @@ end procedure
 """
 
 def run():
-    parsed_text = parse.build_index( "/home/farhanz/CS_121/Assignment_3/searchengine121/ANALYST" )
-    tokens_list = tokenizer.tokenize(parsed_text)
+    parse.build_index( "/Users/emmanuelcruz/downloads/DEV/" )
+    #tokens_list = tokenizer.tokenize(parsed_text)
 
 if __name__ == '__main__':
     run()
