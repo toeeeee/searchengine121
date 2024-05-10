@@ -10,7 +10,7 @@ class Posting:
     def to_dictionary(self):
         return {f'ID': self.ID, 'frequency': self.frequency, 'url': self.url}
 
-
+      
 def update_inverted_index_map(word: str, doc_id: str, tfidf_score: str) -> None:
     """
     Quote from assignment description:

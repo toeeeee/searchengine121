@@ -47,5 +47,6 @@ def run():
     parse.build_index( "/Users/emmanuelcruz/downloads/DEV/" )
     #tokens_list = tokenizer.tokenize(parsed_text)
 
+
 if __name__ == '__main__':
     run()

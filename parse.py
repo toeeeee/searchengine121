@@ -184,7 +184,6 @@ def _write_to_file(index, filename):
             json.dump(data, out)
 
 
-
 if __name__ == '__main__':
     # build_index( "/home/farhanz/CS_121/Assignment_3/searchengine121/ANALYST" )
     pass
