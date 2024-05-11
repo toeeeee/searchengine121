@@ -44,7 +44,8 @@ end procedure
 """
 
 def run():
-    parse.build_index( "/Users/emmanuelcruz/downloads/DEV/" )
+    user_path = input( "Please enter the path to your folder of domain folders (ANALYST or DEV): ")
+    parse.build_index( user_path )
     #tokens_list = tokenizer.tokenize(parsed_text)
 
 

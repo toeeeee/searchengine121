@@ -66,7 +66,7 @@ def build_index(directories: str) -> None:
             if not check_for_duplicates(page_text): #check if page is a duplicate
                 count += 1 #increment total files indexed
                 file_count += 1 #increment file count
-                tokens.extend([token.lower() for token in tokenize(page_text)]) #get tokens
+                tokens.extend([str(token).lower() for token in tokenize(page_text)]) #get tokens
                 counter = Counter(tokens)  # for counting frequencies
                 tokens = list(OrderedDict.fromkeys(tokens))  # remove duplicates
                 ID += 1
