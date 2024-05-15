@@ -1,9 +1,11 @@
+import ast
 import os
 import ujson as json
 from bs4 import BeautifulSoup as BS
 from collections import Counter, OrderedDict
 from tokenizer import tokenize, check_for_duplicates
 from postings import Posting
+from partial_indexer import partial_index
 
 A_C = ['a','b','c']
 D_F = ['d','e','f']
@@ -25,6 +27,10 @@ index_S_U = {}
 index_V_X = {}
 index_Y_Z = {}
 index_misc = {}
+
+index_list = ['index_A_C.txt', 'index_D_F.txt', 'index_G_I.txt', 'index_J_L.txt',
+              'index_M_O.txt', 'index_P_R.txt', 'index_S_U.txt',
+              'index_V_X.txt', 'index_Y_Z.txt', 'index_misc.txt']
 
 def build_index(directories: str) -> None:
     """
@@ -61,6 +67,7 @@ def build_index(directories: str) -> None:
 
             html_content = js_data['content']  # get the html content from the json dictionary
             url = js_data['url']
+
             page_text = BS(html_content, 'html.parser').get_text(strip=True)  # get plain text
 
             if not check_for_duplicates(page_text): #check if page is a duplicate
@@ -72,8 +79,9 @@ def build_index(directories: str) -> None:
                 ID += 1
 
                 for token in tokens:
-                    freq = counter[token]
+                    freq = counter[token] #get the frequency that the token appears in the doc
                     first_char = token[0]
+                    #get the first character of token to determine which index to save it to
 
                     choose_index(token, first_char, freq, ID, url)
 
@@ -92,18 +100,25 @@ def build_index(directories: str) -> None:
                     index_misc = {}
                     file_count = 0 #reset the file chunk count
                     print('Index size limit reached, saving to files.\n')
-                    print('Working...')
+                    print('Working...\n')
 
-    update_unique_tokens(t_set)
-    write_to_files()
-    print('End of files reached. Saved chunks to disk.')
+    update_unique_tokens(t_set) #update unique tokens after finished
+    write_to_files() #write remaining index to files after finishing
+    print('End of files reached. Saved chunks to disk.\n')
 
-    with open('a3_analytics.txt', 'w') as out:
+    with open('a3_analytics.txt', 'w') as out: #write basic analytics to text file
         out.write(f'Number of indexed documents: {count}\nNumber of unique tokens: {len(t_set)}\n')
 
+    print('Done!\n')
+    print('Merging indices...\n')
+    merge_indices() #merge the separate indices into one main index
+    print('Done!\n')
+    print('Starting partial index...\n')
+    partial_index() #create a partial index from the main index
     print('Done!')
 
 def choose_index(token, first_char, freq, ID, url) -> None:
+    #chooses which index to update based on the token (alphabetical)
     global index_A_C, index_D_F, index_G_I, index_J_L, index_M_O,\
             index_P_R, index_S_U, index_V_X, index_Y_Z, index_misc
 
@@ -129,6 +144,7 @@ def choose_index(token, first_char, freq, ID, url) -> None:
         update_index(token, freq, ID, url, index_misc)
 
 def update_index(token, freq, ID, url, index) -> None:
+    #update the given index with a token and Posting values
     if token not in index.keys():
         index[token] = [Posting(ID, freq, url)]
     else:
@@ -136,6 +152,7 @@ def update_index(token, freq, ID, url, index) -> None:
 
 
 def update_unique_tokens(t_set: set) -> None:
+    #update the set of unique tokens
     t_set.update(list(index_A_C.keys()))
     t_set.update(list(index_D_F.keys()))
     t_set.update(list(index_G_I.keys()))
@@ -149,41 +166,58 @@ def update_unique_tokens(t_set: set) -> None:
 
 
 def write_to_files():
-    _write_to_file(index_A_C, 'index_A_C.json')
-    _write_to_file(index_D_F, 'index_D_F.json')
-    _write_to_file(index_G_I, 'index_G_I.json')
-    _write_to_file(index_J_L, 'index_J_L.json')
-    _write_to_file(index_M_O, 'index_M_O.json')
-    _write_to_file(index_P_R, 'index_P_R.json')
-    _write_to_file(index_S_U, 'index_S_U.json')
-    _write_to_file(index_V_X, 'index_V_X.json')
-    _write_to_file(index_Y_Z, 'index_Y_Z.json')
-    _write_to_file(index_misc, 'index_misc.json')
+    #write each index to its respective file
+    _write_to_file(index_A_C, 'index_A_C.txt')
+    _write_to_file(index_D_F, 'index_D_F.txt')
+    _write_to_file(index_G_I, 'index_G_I.txt')
+    _write_to_file(index_J_L, 'index_J_L.txt')
+    _write_to_file(index_M_O, 'index_M_O.txt')
+    _write_to_file(index_P_R, 'index_P_R.txt')
+    _write_to_file(index_S_U, 'index_S_U.txt')
+    _write_to_file(index_V_X, 'index_V_X.txt')
+    _write_to_file(index_Y_Z, 'index_Y_Z.txt')
+    _write_to_file(index_misc, 'index_misc.txt')
 
 def _write_to_file(index, filename):
+    #does the actual writing to the index files
 
     for key, value in index.items():
+        #converts posting objects into dictionaries
+        #in the form {ID, frequency, url}
         for i in range(len(value)):
             value[i] = value[i].to_dictionary()
 
 
     if not os.path.exists(filename): #check if file exists already
-        with open(filename, 'w') as out:
-            json.dump(index, out)
+        with open(filename, 'w') as out: #if it doesn't, simply write the index to the file
+            for key, value in sorted(index.items()): #writes one line per token
+                out.write(f'{{"{key}": {value}}}\n')
     else:
         with open(filename, 'r') as out: #if it exists, load the index from the file to update it
-            data = json.load(out)
-            for key, value in index.items():
-                for posting in value:
-                    try:
-                        data[key].append(posting)
-                    except KeyError:
-                        data[key] = [posting]
+            data = [ast.literal_eval(dic) for dic in out.readlines()]
+            #collects the data and transforms each line into a usable dictionary
+
+        temp_dic = {}
+        temp_dic.update(index) #populate a temporary dictionary with the current index
+
+        for d in data: #for each {token: [postings]} in the data extracted
+            for key, value in temp_dic.items(): #iterate over temp dictionary items
+                if key in d: #if the index key exists in the file already, append the postings
+                    d[key].extend(value)
+                    del index[key] #delete the appended item from the current index
 
         with open(filename, 'w') as out:
-            json.dump(data, out)
+            data = [str(d) + '\n' for d in data] #convert the index back into the string format
+            out.writelines(data) #write the data back to the file
+            for key, value in sorted(index.items()):
+                #write the new items from the index into the end of the file
+                out.write(f'{{"{key}": {value}}}\n')
 
 
-if __name__ == '__main__':
-    # build_index( "/home/farhanz/CS_121/Assignment_3/searchengine121/ANALYST" )
-    pass
+def merge_indices(): #merges all the index files that were created
+    with open('main_index.txt', 'w') as file:
+        for index in index_list:
+            with open(index, 'r') as infile:
+                data = infile.readlines() #get the data from the file
+            file.writelines(data) #write this data into the main index file
+            os.remove(index) #delete the index chunk from disk
