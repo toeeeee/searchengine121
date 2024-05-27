@@ -1,5 +1,9 @@
 import parse
 
+'''
+main.py -> parse.py
+'''
+
 def run():
     user_path = input( "Please enter the path to your folder of domain folders (ANALYST or DEV): ")
     parse.build_index( user_path )
