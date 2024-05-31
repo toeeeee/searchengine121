@@ -15,7 +15,8 @@ def search(query, state, t): #main search function
         try:
             byte = search_data.partial_index[term] #get the byte where the term appears in the index
             search_data.main_index.seek(byte) #navigate to the byte
-            data = eval(search_data.main_index.readline())
+            data = search_data.main_index.readline()
+            data = eval(data)
             #convert the line into a dictionary with eval() function
 
             for posting in data[term]: #for each posting associated with the term
@@ -29,6 +30,7 @@ def search(query, state, t): #main search function
 
     #at the end of searching, get the intersection of all the lists
     #('results' is a list of lists containing docs IDs at this point)
+    results = sorted(results, key=len)
     results = set.intersection(*map(set, results))
 
     end_time = timer() #for time testing

@@ -1,7 +1,7 @@
 import ast
 
 def partial_index(): #create the partial index
-    create_partial_index('main_index.txt')
+    create_partial_index('tfidf_index.txt')
 
 def create_partial_index(index): #actually creates the partial index
     p_index = {} #make the dictionary where the partial index will be stored
