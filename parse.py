@@ -118,12 +118,12 @@ def build_index(directories: str) -> None:
     print('Merging indices...\n')
     merge_indices() #merge the separate indices into one main index
     print('Done!\n')
-    print('Starting partial index...\n')
-    partial_index() #create a partial index from the main index
-    print('Done!')
     print("Calculating tfidf...")
     calculate_tfidf(count)
     print("Done! \n")
+    print('Starting partial index...\n')
+    partial_index() #create a partial index from the main index
+    print('Done! \n')
 
 def choose_index(token, first_char, freq, ID, url, total_terms) -> None:
     #chooses which index to update based on the token (alphabetical)

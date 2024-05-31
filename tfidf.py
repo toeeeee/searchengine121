@@ -1,6 +1,3 @@
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_extraction.text import CountVectorizer
-import pandas as pd
 from math import log
 import os
 '''
@@ -113,8 +110,13 @@ def calculate_tfidf(total_documents):
                     total_terms_in_document = posting['total_terms']
                     tf = times_term_appears / total_terms_in_document
                     tfidf = tf * idf
-                    posting['tfidf'] = tfidf
-                index_content = {key : postings}
-                writefile.writelines(str(index_content) + "\n")  # write this data into the main index file
+                    if tfidf > 2:
+                        posting['tfidf'] = 2
+                    else:
+                        posting['tfidf'] = tfidf
+                #index_content = {key: postings}
+                writefile.write(f'{{"{key}": {postings}}}\n')  # write this data into the main index file
                 line = file.readline()
     os.remove('main_index.txt')  # delete the index chunk from disk
+
+#out.write(f'{{"{key}": {value}}}\n')
