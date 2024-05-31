@@ -1,11 +1,13 @@
 import ast
 import os
+import math
 import ujson as json
 from bs4 import BeautifulSoup as BS
 from collections import Counter, OrderedDict
 from tokenizer import tokenize, check_for_duplicates
 from postings import Posting
 from partial_indexer import partial_index
+from tfidf import calculate_tfidf
 
 A_C = ['a','b','c']
 D_F = ['d','e','f']
@@ -52,6 +54,7 @@ def build_index(directories: str) -> None:
     count: int = 0
     file_count: int = 0
     t_set: set = set()
+    total_terms = 0
     print('Working...')
 
     for root, dirs, files in os.walk(directories):  # traverse dirs & get files at all levels
@@ -76,6 +79,7 @@ def build_index(directories: str) -> None:
                 file_count += 1 #increment file count
                 tokens.extend([str(token).lower() for token in tokenize(page_text)]) #get tokens
                 counter = Counter(tokens)  # automatically count all tokens (duplicates included)
+                total_terms = len(tokens)
                 tokens = list(OrderedDict.fromkeys(tokens))  # remove duplicates
                 ID += 1
 
@@ -113,42 +117,45 @@ def build_index(directories: str) -> None:
     print('Merging indices...\n')
     merge_indices() #merge the separate indices into one main index
     print('Done!\n')
+    print("Calculating tfidf...")
+    calculate_tfidf(count)
+    print("Done! \n")
     print('Starting partial index...\n')
     partial_index() #create a partial index from the main index
-    print('Done!')
+    print('Done! \n')
 
-def choose_index(token, first_char, freq, ID, url) -> None:
+def choose_index(token, first_char, freq, ID, url, total_terms) -> None:
     #chooses which index to update based on the token (alphabetical)
     global index_A_C, index_D_F, index_G_I, index_J_L, index_M_O,\
             index_P_R, index_S_U, index_V_X, index_Y_Z, index_misc
 
     if first_char in A_C:
-        update_index(token, freq, ID, url, index_A_C)
+        update_index(token, freq, ID, url, index_A_C, total_terms)
     elif first_char in D_F:
-        update_index(token, freq, ID, url, index_D_F)
+        update_index(token, freq, ID, url, index_D_F, total_terms)
     elif first_char in G_I:
-        update_index(token, freq, ID, url, index_G_I)
+        update_index(token, freq, ID, url, index_G_I, total_terms)
     elif first_char in J_L:
-        update_index(token, freq, ID, url, index_J_L)
+        update_index(token, freq, ID, url, index_J_L, total_terms)
     elif first_char in M_O:
-        update_index(token, freq, ID, url, index_M_O)
+        update_index(token, freq, ID, url, index_M_O, total_terms)
     elif first_char in P_R:
-        update_index(token, freq, ID, url, index_P_R)
+        update_index(token, freq, ID, url, index_P_R, total_terms)
     elif first_char in S_U:
-        update_index(token, freq, ID, url, index_S_U)
+        update_index(token, freq, ID, url, index_S_U, total_terms)
     elif first_char in V_X:
-        update_index(token, freq, ID, url, index_V_X)
+        update_index(token, freq, ID, url, index_V_X, total_terms)
     elif first_char in Y_Z:
-        update_index(token, freq, ID, url, index_Y_Z)
+        update_index(token, freq, ID, url, index_Y_Z, total_terms)
     else:
-        update_index(token, freq, ID, url, index_misc)
+        update_index(token, freq, ID, url, index_misc, total_terms)
 
-def update_index(token, freq, ID, url, index) -> None:
+def update_index(token, freq, ID, url, index, total_terms) -> None:
     #update the given index with a token and Posting values
     if token not in index.keys():
-        index[token] = [Posting(ID, freq, url)]
+        index[token] = [Posting(ID, freq, url, total_terms)]
     else:
-        index[token].append(Posting(ID, freq, url))
+        index[token].append(Posting(ID, freq, url, total_terms))
 
 
 def update_unique_tokens(t_set: set) -> None:

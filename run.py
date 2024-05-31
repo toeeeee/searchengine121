@@ -37,7 +37,7 @@ def load_partial_indices():
 
 if __name__ == '__main__':
     print('Loading...\n')
-    index_file = open('main_index.txt', 'r')
+    index_file = open('tfidf_index.txt', 'r')
     search_data = load_partial_indices() #load the partial index on disk
     query = input('Enter query: ("~" to quit)\n') #prompt for query
 
@@ -46,7 +46,11 @@ if __name__ == '__main__':
         search_data.set_query(query) #set the query attribute in the State object
         search_data.set_main_index(index_file)
         terms = tokenize(query) #tokenize the query
-        terms = [term for term in terms if term not in STOP_WORDS] #remove stop words from the query
+        stop_word_amt = len([t for t in terms if t in STOP_WORDS])
+        if stop_word_amt / len(terms) > 0.8:
+            terms = set(terms)
+        else:
+            terms = set([term for term in terms if term not in STOP_WORDS]) #remove stop words from the query
         #search for documents with the given query, get a list of doc IDs and an ID and url reference
         results, id_ref = search(terms, search_data, start_time)
         if not results: #if no results, ask for another query
