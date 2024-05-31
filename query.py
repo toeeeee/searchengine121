@@ -1,6 +1,9 @@
 from timeit import default_timer as timer
+from tfidf import calculate_tf_tq
+from math import log
 
 search_data = None #global State object for accessing index data
+
 
 def search(query, state, t): #main search function
     global search_data
@@ -8,10 +11,15 @@ def search(query, state, t): #main search function
 
     posting_id_ref = {} #keeping track of the ID's associated with each url
     results = [] #create an empty list to store results (list of doc IDs)
+    scores = []
+    length = []
 
     for term in query:
         curr_results = []
+        tf_tq = calculate_tf_tq(term, query)
+        idf_tD = None
 
+        # FETCH POSTING LIST FOR TERM
         try:
             byte = search_data.partial_index[term] #get the byte where the term appears in the index
             search_data.main_index.seek(byte) #navigate to the byte
@@ -19,9 +27,15 @@ def search(query, state, t): #main search function
             data = eval(data)
             #convert the line into a dictionary with eval() function
 
-            for posting in data[term]: #for each posting associated with the term
+            for posting in data[term]:
+                idf_tD = posting['idf']
+                break
+
+            w_tq = tf_tq * idf_tD
+
+            for posting in data[term]: #for each posting/document associated with the term
                 curr_results.append(posting['ID']) #add the IDs of results to current results
-                posting_id_ref[posting['ID']] = posting['url'] #update the id reference dictionary
+                posting_id_ref[posting['ID']] = (posting['url'], posting['tfidf'], posting['tf']) #update the id reference dictionary
 
             results.append(curr_results) #add the results to the main results list
 
@@ -35,4 +49,5 @@ def search(query, state, t): #main search function
 
     end_time = timer() #for time testing
     print(end_time - t)
+    print(' seconds.')
     return results, posting_id_ref #return the intersection and the doc ID to url reference

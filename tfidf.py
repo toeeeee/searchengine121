@@ -1,4 +1,5 @@
 from math import log
+from tokenizer import tokenize
 import os
 '''
 corpus = ['This is the first document.',
@@ -93,6 +94,26 @@ rather than use dev
 
 run indexer with that
 '''
+
+def calculate_tf_tq(term, query):
+    """Calculate tf for term in a query"""
+    freq = 0
+    total_terms = 0
+    for token in tokenize(query):
+        total_terms += 1
+        if term == token:
+            freq += 1
+    tf = freq / total_terms
+    tf = 1 + log(tf)
+    return tf
+
+def calculate_weight_tq(tf, idf):
+    """
+    Calculate tfidf for a term in a query
+    """
+
+
+
 def calculate_tfidf(total_documents):
     with open('tfidf_index.txt', 'w') as writefile:
         with open('main_index.txt', 'r') as file:
@@ -103,17 +124,19 @@ def calculate_tfidf(total_documents):
                 postings = index_content[key]
 
                 df = len(postings)
-                idf = log(total_documents/df + 1)
+                idf = log(total_documents/(df + 1))
 
                 for posting in postings:
                     times_term_appears = posting['frequency']
                     total_terms_in_document = posting['total_terms']
                     tf = times_term_appears / total_terms_in_document
+                    tf = (1 + log(tf))
                     tfidf = tf * idf
                     if tfidf > 2:
                         posting['tfidf'] = 2
                     else:
                         posting['tfidf'] = tfidf
+                        posting['tf'] = tf
                 #index_content = {key: postings}
                 writefile.write(f'{{"{key}": {postings}}}\n')  # write this data into the main index file
                 line = file.readline()
