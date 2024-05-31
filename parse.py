@@ -17,6 +17,7 @@ S_U = ['s','t','u']
 V_X = ['v','w','x']
 Y_Z = ['y','z']
 
+# Key: token, Value: list of Postings
 index_A_C = {}
 index_D_F = {}
 index_G_I = {}
@@ -47,16 +48,16 @@ def build_index(directories: str) -> None:
     global index_A_C, index_D_F, index_G_I, index_J_L, index_M_O, index_P_R,\
         index_S_U, index_V_X, index_Y_Z, index_misc
 
-    ID: int = 0
-    count = 0
-    file_count = 0
-    t_set = set()
+    ID: int = 0 # id of file
+    count: int = 0
+    file_count: int = 0
+    t_set: set = set()
     print('Working...')
 
     for root, dirs, files in os.walk(directories):  # traverse dirs & get files at all levels
         for file in files:  # iterate over every file in the directory
             path = os.path.join(root, file)
-            tokens = []
+            tokens = [] # new list for each file!
 
             if ".DS_Store" in path:  # this file is hidden in the dir, and isn't a json file; skip it if found
                 continue
@@ -74,7 +75,7 @@ def build_index(directories: str) -> None:
                 count += 1 #increment total files indexed
                 file_count += 1 #increment file count
                 tokens.extend([str(token).lower() for token in tokenize(page_text)]) #get tokens
-                counter = Counter(tokens)  # for counting frequencies
+                counter = Counter(tokens)  # automatically count all tokens (duplicates included)
                 tokens = list(OrderedDict.fromkeys(tokens))  # remove duplicates
                 ID += 1
 
@@ -82,7 +83,6 @@ def build_index(directories: str) -> None:
                     freq = counter[token] #get the frequency that the token appears in the doc
                     first_char = token[0]
                     #get the first character of token to determine which index to save it to
-
                     choose_index(token, first_char, freq, ID, url)
 
                 if file_count >= 18465: #if file chunk limit is reached

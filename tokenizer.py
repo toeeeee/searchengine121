@@ -1,6 +1,6 @@
 import globals
-import sqlite3
 import hashlib
+from sqllite_context_manager import SQLite
 from nltk.stem import PorterStemmer
 from nltk.tokenize import RegexpTokenizer
 
@@ -59,13 +59,9 @@ def tokenize(parsed_text: str) -> list:
     parsed_text: a string object of plain text
     
     Return
-    id_and_tokens: a tuple in the form (docID, list of all the words in the string)
+    tokens_list: a list of strings (tokens)
     """
-    
-    # Do exact duplicate page detection
-    #duplicate = check_for_duplicates(parsed_text)
-    #if duplicate:  # since this page is an exact duplicate of one already visited, skip it
-        #return (0, [])
+
     # regex pattern: split text into separate tokens, keeping hyphenated words and words with apostrophes together
     pattern = r"\b(?:[a-zA-Z]+(?:'[a-zA-Z]+)?(?:-[a-zA-Z]+)?)\b"
     # Create a tokenizer using the custom pattern
@@ -95,34 +91,25 @@ def check_for_duplicates(text: str) -> bool:
     
     hash_obj = hashlib.sha256(text.encode()).hexdigest()  # generate the sha256 hash of the given text
     # create a connection to the database 'hashes.db' (creates the db if it doesn't already exist)
-    con = sqlite3.connect("hashes.db")
-    # Create a db cursor to execute SQL statements and fetch results from SQL queries
-    cur = con.cursor()
-    # check if the 'hashes' table already exists in the 'hashes' db
-    res = cur.execute("SELECT name FROM sqlite_master WHERE name='hashes'")
-    res = res.fetchone()  # if res == anything other than None, then it exists in db
-    if not res:  # if it doesn't exist, create the 'hashes' table
-        cur.execute(" CREATE TABLE hashes (hash STR) ")  # table created with one column named 'hash'
-        con.commit()  # commit the CREATE TABLE transaction to the db
+    with SQLite("hashes.db") as db:
+        # check if the 'hashes' table already exists in the 'hashes' db
+        res = db.cursor.execute("SELECT name FROM sqlite_master WHERE name='hashes'")
+        res = res.fetchone()  # if res == anything other than None, then it exists in db
+        if not res:  # if it doesn't exist, create the 'hashes' table
+            db.cursor.execute("CREATE TABLE hashes (hash STR)")  # table created with one column named 'hash'
+            db.connection.commit()  # commit the CREATE TABLE transaction to the db
     
-    # check if hash already in db
-    res = cur.execute("SELECT * FROM hashes WHERE hash = ?", (hash_obj,))
-    res = res.fetchone()  # if res == anything other than None, it was found in the table
-    if res:  # since it's in db, return True: this page is a duplicate of one already crawled over
-        cur.close()
-        con.close()
-        return True
-    # otherwise, add its hash to the table
-    cur.execute(f"""INSERT INTO hashes(hash) VALUES(?)""", (hash_obj, ))
-    con.commit()  # commit the INSERT transaction to db
+        # check if hash already in db
+        res = db.cursor.execute("SELECT * FROM hashes WHERE hash = ?", (hash_obj,))
+        res = res.fetchone()  # if res == anything other than None, it was found in the table
+        if res:  # since it's in db, return True: this page is a duplicate of one already crawled over
+            return True
+        # otherwise, add its hash to the table
+        db.cursor.execute(f"""INSERT INTO hashes(hash) VALUES(?)""", (hash_obj, ))
+        db.connection.commit()  # commit the INSERT transaction to db
 
-    # close connections
-    cur.close()
-    con.close()
-    
     return False
 
 
 if __name__ == '__main__':
-    # print( tokenize("i can't believe it's may 7th, and we're still waiting for the sun to shine. asdf-qwer zxcv/tyui") )
     pass
