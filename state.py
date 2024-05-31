@@ -1,5 +1,3 @@
-
-
 class State:
     """Class to hold partial index data and queries"""
     def __init__(self):

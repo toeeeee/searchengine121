@@ -54,7 +54,7 @@ def build_index(directories: str) -> None:
     count: int = 0
     file_count: int = 0
     t_set: set = set()
-    total_terms = 0
+    total_terms: int = 0
     print('Working...')
 
     for root, dirs, files in os.walk(directories):  # traverse dirs & get files at all levels
@@ -87,7 +87,7 @@ def build_index(directories: str) -> None:
                     freq = counter[token] #get the frequency that the token appears in the doc
                     first_char = token[0]
                     #get the first character of token to determine which index to save it to
-                    choose_index(token, first_char, freq, ID, url)
+                    choose_index(token, first_char, freq, ID, url, total_terms)
 
                 if file_count >= 18465: #if file chunk limit is reached
                     update_unique_tokens(t_set) #update the set of unique tokens
