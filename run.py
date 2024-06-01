@@ -39,7 +39,7 @@ if __name__ == '__main__':
     print('Loading...\n')
     index_file = open('tfidf_index.txt', 'r')
     search_data = load_partial_indices() #load the partial index on disk
-    query = input('Enter query: ("~" to quit)\n') #prompt for query
+    query: str = input('Enter query: ("~" to quit)\n') #prompt for query
 
     while query != '~':
         start_time = timer() #for time testing
@@ -58,7 +58,8 @@ if __name__ == '__main__':
             query = input('Enter query: ("~" to quit)\n')
             continue
         for r in list(results)[:5]: #print the first 5 results to the console ( for now )
-            print(f'{id_ref[r]}')
+            print(f'{id_ref[r[0]]}')
+            print(f'Ranking is {r[1]}.')
             #results is a list of doc IDs, so we use id_ref to get the url
             # associated with the ID
         query = input('Enter query: ("~" to quit)\n')
