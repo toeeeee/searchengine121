@@ -44,14 +44,8 @@ def calculate_tfidf(total_documents):
                         tf = 0
                     else:
                         tf = 1 + log(times_term_appears)
-                    tfidf = tf * idf
-                    if tfidf > 2:
-                        posting['tfidf'] = 2
-                    else:
-                        posting['tfidf'] = tfidf
-                        posting['tfidf2'] = tfidf ** 2
-                        posting['tf'] = tf
-                        posting['idf'] = idf
+                    posting['tf'] = tf
+                    posting['idf'] = idf
                 #index_content = {key: postings}
                 writefile.write(f'{{"{key}": {postings}}}\n')  # write this data into the main index file
                 line = file.readline()

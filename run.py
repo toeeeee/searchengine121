@@ -58,11 +58,13 @@ if __name__ == '__main__':
             print(f'No results for: {query}')
             query = input('Enter query: ("~" to quit)\n')
             continue
+
+        print(f"Total documents found: {len(results)}")
         i = 0
         for docid in results: #print the first 5 results to the console ( for now )
             if i >= 5:
                 break
-            print(f'{id_ref[docid]}')
+            print(f'{id_ref[docid][0]}')
             print(f'Ranking is {results[docid]}.')
             #results is a list of doc IDs, so we use id_ref to get the url
             # associated with the ID

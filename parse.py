@@ -1,7 +1,7 @@
 import ast
 import os
-import math
 import ujson as json
+#import requests
 from bs4 import BeautifulSoup as BS
 from collections import Counter, OrderedDict
 from tokenizer import tokenize, check_for_duplicates
@@ -54,7 +54,6 @@ def build_index(directories: str) -> None:
     count: int = 0
     file_count: int = 0
     t_set: set = set()
-    total_terms: int = 0
     print('Working...')
 
     for root, dirs, files in os.walk(directories):  # traverse dirs & get files at all levels
@@ -69,10 +68,48 @@ def build_index(directories: str) -> None:
             js_data = json.load(js_file)  # get file contents
             js_file.close()  # close the file
 
+            # Stuff for ranking
             html_content = js_data['content']  # get the html content from the json dictionary
             url = js_data['url']
 
-            page_text = BS(html_content, 'html.parser').get_text(strip=True)  # get plain text
+            #Some error checking-------------------------------------------------------------------------
+            if "cs.ics.uci.edu/news/" in url: # this website has a lot of depreciated links
+                continue
+            """try:
+                response = requests.get(url, timeout = 0.7)
+                headers = response.headers
+                if "Last-Modified" in headers:
+                    last_mod = headers['Last-Modified']
+                    last_mod = last_mod.split(' ')
+                    yr = last_mod[3]
+                    if int(yr) < 2007:
+                        continue
+                status_code = response.status_code
+                if status_code != 200:
+                    continue
+            except requests.exceptions.ConnectionError:
+                continue
+            except requests.exceptions.ReadTimeout:
+                continue
+            except requests.exceptions.RequestException:
+                print('unknown')
+                continue
+            """ # TAKES WAY TOO LONG FOR MINIMAL BENEFIT
+            #-----------------------------------------------------------------------------------------
+
+
+            soup = BS(html_content, 'html.parser')
+            page_text = soup.get_text(strip=True)  # get plain text
+            if soup.title:
+                title = soup.title.string
+            else:
+                title = "No title"
+
+            bolds = soup.findAll('b')
+            bolds_strs = []
+            for bold in bolds:
+                bolds_strs.append(bold.string)
+
 
             if not check_for_duplicates(page_text): #check if page is a duplicate
                 count += 1 #increment total files indexed
@@ -87,7 +124,7 @@ def build_index(directories: str) -> None:
                     freq = counter[token] #get the frequency that the token appears in the doc
                     first_char = token[0]
                     #get the first character of token to determine which index to save it to
-                    choose_index(token, first_char, freq, ID, url, total_terms)
+                    choose_index(token, first_char, freq, ID, url, total_terms, title, bolds_strs)
 
                 if file_count >= 18465: #if file chunk limit is reached
                     update_unique_tokens(t_set) #update the set of unique tokens
@@ -124,38 +161,38 @@ def build_index(directories: str) -> None:
     partial_index() #create a partial index from the main index
     print('Done! \n')
 
-def choose_index(token, first_char, freq, ID, url, total_terms) -> None:
+def choose_index(token, first_char, freq, ID, url, total_terms, title, bolds) -> None:
     #chooses which index to update based on the token (alphabetical)
     global index_A_C, index_D_F, index_G_I, index_J_L, index_M_O,\
             index_P_R, index_S_U, index_V_X, index_Y_Z, index_misc
 
     if first_char in A_C:
-        update_index(token, freq, ID, url, index_A_C, total_terms)
+        update_index(token, freq, ID, url, index_A_C, total_terms, title, bolds)
     elif first_char in D_F:
-        update_index(token, freq, ID, url, index_D_F, total_terms)
+        update_index(token, freq, ID, url, index_D_F, total_terms, title, bolds)
     elif first_char in G_I:
-        update_index(token, freq, ID, url, index_G_I, total_terms)
+        update_index(token, freq, ID, url, index_G_I, total_terms, title, bolds)
     elif first_char in J_L:
-        update_index(token, freq, ID, url, index_J_L, total_terms)
+        update_index(token, freq, ID, url, index_J_L, total_terms, title, bolds)
     elif first_char in M_O:
-        update_index(token, freq, ID, url, index_M_O, total_terms)
+        update_index(token, freq, ID, url, index_M_O, total_terms, title, bolds)
     elif first_char in P_R:
-        update_index(token, freq, ID, url, index_P_R, total_terms)
+        update_index(token, freq, ID, url, index_P_R, total_terms, title, bolds)
     elif first_char in S_U:
-        update_index(token, freq, ID, url, index_S_U, total_terms)
+        update_index(token, freq, ID, url, index_S_U, total_terms, title, bolds)
     elif first_char in V_X:
-        update_index(token, freq, ID, url, index_V_X, total_terms)
+        update_index(token, freq, ID, url, index_V_X, total_terms, title, bolds)
     elif first_char in Y_Z:
-        update_index(token, freq, ID, url, index_Y_Z, total_terms)
+        update_index(token, freq, ID, url, index_Y_Z, total_terms, title, bolds)
     else:
-        update_index(token, freq, ID, url, index_misc, total_terms)
+        update_index(token, freq, ID, url, index_misc, total_terms, title, bolds)
 
-def update_index(token, freq, ID, url, index, total_terms) -> None:
+def update_index(token, freq, ID, url, index, total_terms, title, bolds) -> None:
     #update the given index with a token and Posting values
     if token not in index.keys():
-        index[token] = [Posting(ID, freq, url, total_terms)]
+        index[token] = [Posting(ID, freq, url, total_terms, title, bolds)]
     else:
-        index[token].append(Posting(ID, freq, url, total_terms))
+        index[token].append(Posting(ID, freq, url, total_terms, title, bolds))
 
 
 def update_unique_tokens(t_set: set) -> None:
