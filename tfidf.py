@@ -11,7 +11,10 @@ def calculate_tf_tq(given_term: str, query: set):
         total_terms += 1
         if given_term == term:
             freq += 1
-    tf = freq / total_terms
+    if freq <= 0:
+        tf = 0
+    else:
+        tf = 1 + log(freq)
     return tf
 
 def calculate_weight_tq(tf, idf):
@@ -36,7 +39,11 @@ def calculate_tfidf(total_documents):
                 for posting in postings:
                     times_term_appears = posting['frequency']
                     total_terms_in_document = posting['total_terms']
-                    tf = times_term_appears / total_terms_in_document
+                    #tf = times_term_appears / total_terms_in_document
+                    if times_term_appears <= 0:
+                        tf = 0
+                    else:
+                        tf = 1 + log(times_term_appears)
                     tfidf = tf * idf
                     if tfidf > 2:
                         posting['tfidf'] = 2
