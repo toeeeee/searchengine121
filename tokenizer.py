@@ -1,54 +1,7 @@
-import globals
 import hashlib
 from sqllite_context_manager import SQLite
 from nltk.stem import PorterStemmer
 from nltk.tokenize import RegexpTokenizer
-
-
-def update_global_dict(tokens_list: list) -> None:
-    """
-    Given a list of words, add them to the global dictionary of word frequencies (this dict counts frequency of word encounters across all pages visited).
-
-    Parameter(s)
-    tokens_list: list of tokens generated from 'tokenize' function
-
-    Return
-    None
-    """
-
-    # globals.FREQ_DICT
-
-    for token in tokens_list:
-        try:
-            # increment the number of times this token has been encountered by 1
-            globals.FREQ_DICT[token] += 1
-        except KeyError:
-            # if the token isn't in the dict, this must be the first time this token has been encountered: add the token to dict with frequency of encounters = 1
-            globals.FREQ_DICT[token] = 1
-    return
-
-
-def update_page_dict(tokens_list: list) -> dict:
-    """
-    Given a list of tokens, add them to the dictionary of tokens encountered.
-
-    Parameter(s)
-    tokens_list: list of tokens
-
-    Return
-    dictionary object of unique tokens encountered and their frequencies
-    """
-
-    freq_dict = {}
-    for token in tokens_list:
-        try:
-            # increment the number of times this token has been encountered by 1
-            freq_dict[token] += 1
-        except KeyError:
-            # if the token isn't in the dict, this must be the first time this token has been encountered: add the token to dict with frequency of encounters = 1
-            freq_dict[token] = 1
-
-    return freq_dict
 
 
 def tokenize(parsed_text: str) -> list:
@@ -63,7 +16,8 @@ def tokenize(parsed_text: str) -> list:
     """
 
     # regex pattern: split text into separate tokens, keeping hyphenated words and words with apostrophes together
-    pattern = r"\b(?:[a-zA-Z]+(?:'[a-zA-Z]+)?(?:-[a-zA-Z]+)?)\b"
+    # pattern = r"\b(?:[a-zA-Z]+(?:'[a-zA-Z]+)?(?:-[a-zA-Z]+)?)\b"
+    pattern = r'\b\d+\.\d+\b|\b\d+\b|\b\w+(?:-\w+)*\b|\b\w+(?:\'\w+)*\b'
     # Create a tokenizer using the custom pattern
     tokenizer = RegexpTokenizer(pattern)
     # Tokenize the given text
@@ -77,6 +31,7 @@ def tokenize(parsed_text: str) -> list:
     return tokens_list
 
 
+# SAME PAGE CHECK CODE -------------------------------------------------------------------------------------------------
 def check_for_duplicates(text: str) -> bool:
     """
     check if the current page is an exact duplicate of other pages already visited. Does so by creating a sha256 hash object of the text,
@@ -111,5 +66,79 @@ def check_for_duplicates(text: str) -> bool:
     return False
 
 
-if __name__ == '__main__':
-    pass
+# SIMHASHING CODE ------------------------------------------------------------------------------------------------------
+def string_to_binary_hash(string):
+    hash_value = hashlib.sha256(string.encode()).hexdigest()
+    binary_hash = bin(int(hash_value, 16))[2:] # remove header of binary string
+    binary_hash = binary_hash[:10].zfill(10)
+    return binary_hash
+
+def list_to_binary_hash(string_list):
+    binary_hashes = []
+    for string in string_list:
+        binary_hash = string_to_binary_hash(string)
+        binary_hashes.append(binary_hash)
+    return binary_hashes
+
+def computeWordFrequencies(tokens) -> dict :  # return frequencies of file's tokens
+    instances = {} # dict of frequencies of words in the given text file
+    for token in tokens:
+        if token not in instances:
+            instances[token] = 0
+        instances[token] += 1
+    return instances
+
+def count_digit(token_freq):
+    data_for_fingerprint = []
+    for x in range(10):
+        bit_sum = 0
+        for key, value in token_freq.items():
+            if get_digit(int(key), x) > 0:
+                bit_sum += value
+            else:
+                bit_sum -= value
+        data_for_fingerprint.append(bit_sum)
+    return data_for_fingerprint
+
+# The // performs integer division by a power of ten to move the digit to the ones position, 
+# then the % gets the remainder after division by 10.
+# Note that the numbering in this scheme uses zero-indexing and starts from the right side of the number.
+def get_digit(number, n):
+    return number // 10**n % 10
+
+def generate_fingerprint(list):
+    fingerprint = []
+    for value in list:
+        if value > 0:
+            fingerprint.append(1)
+        else:
+            fingerprint.append(0)
+    return fingerprint
+
+#if its similar return true, else return false
+def compare_fingerprint(previous_hash, new_fingerprint):
+    #see how many bits are the same from the first fingerprint to the second
+    similarity_score = 0
+    threshold = 0.85
+    for x in range(10):
+        if previous_hash[x] == new_fingerprint[x]:
+            similarity_score += 1
+    if similarity_score/10 > threshold:
+        return True
+    return False
+
+#handles calendar webpages/ blogs/ events
+#values of the binary are reversed, that means the data originally is 1-2-3-4-5, but our fingerprint is stored as 5-4-3-2-1
+#if you want to access these values, start from the beginning of the fingerprint (but know that that's the last hash)
+def sim_hash(previous_hash, tokens):
+    global PREVIOUS_HASH
+
+    hash_tokens = list_to_binary_hash(tokens)
+    token_freq = computeWordFrequencies(hash_tokens)
+    #print(token_freq)
+    fingerprint = generate_fingerprint(count_digit(token_freq))
+    if PREVIOUS_HASH:
+        if compare_fingerprint(previous_hash, fingerprint) == True:
+            return True
+    PREVIOUS_HASH = fingerprint
+    return False
