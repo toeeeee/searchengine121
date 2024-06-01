@@ -11,8 +11,8 @@ def search(query, state, t): #main search function
 
     posting_id_ref = {} #keeping track of the ID's associated with each url
     results = [] #create an empty list to store results (list of doc IDs)
-    scores = []
-    length = []
+    scores = {} # key is ID , value is query weight with respect to term
+    length = {}
 
     for term in query:
         curr_results = []
@@ -35,7 +35,17 @@ def search(query, state, t): #main search function
 
             for posting in data[term]: #for each posting/document associated with the term
                 curr_results.append(posting['ID']) #add the IDs of results to current results
-                posting_id_ref[posting['ID']] = (posting['url'], posting['tfidf'], posting['tf']) #update the id reference dictionary
+                posting_id_ref[posting['ID']] = posting['url'] #update the id reference dictionary
+
+                # compute vector
+                w_td = posting['tfidf']
+                if posting['ID'] in scores.keys():
+                    scores[posting['ID']] += w_tq * w_td
+                else:
+                    scores[posting['ID']] = w_tq * w_td
+
+                # compute vector magnitude/length
+
 
             results.append(curr_results) #add the results to the main results list
 
