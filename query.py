@@ -11,25 +11,19 @@ def search(query: set, state, t): #main search function
     search_data = state
 
     posting_id_ref = {} #keeping track of the ID's associated with each url
-    results = [] #create an empty list to store results (list of doc IDs)
+    results = {} #create an empty dict to store results (list of doc IDs)
     # list of lists where inner list is [id, rank]
 
-    # calculate cosine similarity
-    # (sum of w_td*w_tq) / (sqrt(sum of w_td^2) *  sqrt(sum of w_tq^2))
-    # we have mult. documents to calc w for but only one query to calc w for
-    sum_of_wtq_wtd = []
-    w_td_w_tq = {} # key is ID , value is query weight with respect to term
-    sum_of_wtd = {}
+    wtd_vectors = {}
+    sum_w_td_2 = 0
+
+    wtq_vector = {}
     sum_w_tq_2 = 0
 
     for term in query:
-        #print(f'term: {term}')
-        curr_results = []
-        tf_tq = calculate_tf_tq(term, query) # tf for term in query
-        #print(tf_tq)
+        curr_results = {}
+        tf_tq = calculate_tf_tq(term, query) # weighted tf for term in query
         idf_tD = None
-
-        # SHOULD SUM UP ALL WEIGHTS FOR A SPECIFIC TERM IN QUERY * WEIGHT OF SPEC. TERM IN DOC.
 
         # FETCH POSTING LIST FOR TERM
         try:
@@ -38,42 +32,56 @@ def search(query: set, state, t): #main search function
             data = search_data.main_index.readline()
             data = eval(data)
             #convert the line into a dictionary with eval() function
+
             for posting in data[term]:
                 idf_tD = posting['idf']
                 break
+
             w_tq = tf_tq * idf_tD # WEIGHT FOR SPEC. TERM IN QUERY
+            wtq_vector[term] = w_tq
             sum_w_tq_2 += (w_tq ** 2)
 
-            for posting in data[term]: #for each posting/document associated with the term
-                curr_results.append([posting['ID'], 0]) #add the IDs of results to current results
+            for posting in data[term]:
+                curr_results.update({posting['ID']: 0}) #add the IDs of results to current results w 0 rank
                 posting_id_ref[posting['ID']] = posting['url'] #update the id reference dictionary
 
-                # go through each document for a term and
-                # calculate weight_term_in_query * weight_term_in_document
-                w_td = posting['tfidf'] # WEIGHT FOR SPEC TERM IN A DOC THAT GETS CYCLED THRU
-                if posting['ID'] in w_td_w_tq.keys():
-                    w_td_w_tq[posting['ID']] += w_tq * w_td # GO TO ID AND ADD UP ALL WEIGHTS FOR ALL TERMS
+                w_td = posting['tf'] # WEIGHT FOR SPEC TERM IN A DOC THAT GETS CYCLED THRU
+                if term in wtd_vectors:
+                    wtd_vectors[posting['ID']][term] = w_td
                 else:
-                    w_td_w_tq[posting['ID']] = w_tq * w_td
+                    wtd_vectors[posting['ID']] = {term: w_td}
 
-                if posting['ID'] in sum_of_wtd.keys():
-                    sum_of_wtd[posting['ID']] += posting['tfidf2']
-                else:
-                    sum_of_wtd[posting['ID']] = posting['tfidf2']
-            results += curr_results #add the results to the main results list
+            results.update(curr_results) #add the results to the main results
+        finally:
+            """"""
+        #except KeyError: #if the key does not exist in the partial index, nothing was found
+            #print('error')
+            #return None, None
 
-        except KeyError: #if the key does not exist in the partial index, nothing was found
-            print('error')
-            return None, None
+    # CALCULATE NORMALIZED WEIGHTS FOR wtq
+    len_wtq = sqrt(sum_w_tq_2)
+    for wordd, wtq in wtq_vector.items():
+        wtq /= len_wtq
 
-    # CALCULATE AND APPEND SCORE TO RESULT
-    for result in results:
-        if (result[0] in w_td_w_tq.keys()) and (result[0] in sum_of_wtd.keys()):
-            rank = (w_td_w_tq[result[0]]) / (sqrt(sum_of_wtd[result[0]]) * sqrt(sum_w_tq_2))
-            result[1] = rank
+    # FOR wtd
+    for docid in wtd_vectors:
+        for term in wtd_vectors[docid]:
+            sum_w_td_2 += wtd_vectors[docid][term]
+        len_wtd = sqrt(sum_w_td_2)
 
-    results = sorted(results, key= lambda r: r[1], reverse = True)
-    #results = set.intersection(*map(set, results))
+        for term in wtd_vectors[docid]:
+            wtd_vectors[docid][term] /= len_wtd
+
+        sum_w_td_2 = 0
+
+    rank = 0
+    for docid in wtd_vectors:
+        for term in wtd_vectors[docid]:
+            if term in wtq_vector:
+                rank += (wtq_vector[term] * wtd_vectors[docid][term])
+        #done
+        results[docid] = rank
+        rank = 0
 
     end_time = timer() #for time testing
     print(end_time - t)

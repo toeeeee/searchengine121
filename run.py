@@ -53,15 +53,20 @@ if __name__ == '__main__':
             terms = set([term for term in terms if term not in STOP_WORDS]) #remove stop words from the query
         #search for documents with the given query, get a list of doc IDs and an ID and url reference
         results, id_ref = search(terms, search_data, start_time)
+        results = {key: val for key,val in sorted(results.items(), key=lambda item: item[1], reverse = True)}
         if not results: #if no results, ask for another query
             print(f'No results for: {query}')
             query = input('Enter query: ("~" to quit)\n')
             continue
-        for r in list(results)[:5]: #print the first 5 results to the console ( for now )
-            print(f'{id_ref[r[0]]}')
-            print(f'Ranking is {r[1]}.')
+        i = 0
+        for docid in results: #print the first 5 results to the console ( for now )
+            if i >= 5:
+                break
+            print(f'{id_ref[docid]}')
+            print(f'Ranking is {results[docid]}.')
             #results is a list of doc IDs, so we use id_ref to get the url
             # associated with the ID
+            i += 1
         query = input('Enter query: ("~" to quit)\n')
 
     print('Goodbye!')
