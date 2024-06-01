@@ -63,7 +63,8 @@ def tokenize(parsed_text: str) -> list:
     """
 
     # regex pattern: split text into separate tokens, keeping hyphenated words and words with apostrophes together
-    pattern = r"\b(?:[a-zA-Z]+(?:'[a-zA-Z]+)?(?:-[a-zA-Z]+)?)\b"
+    # also keeps together space + numbers
+    pattern = r"\b(?:[a-zA-Z0-9]+(?:'[a-zA-Z]+)?(?:-[a-zA-Z]+)?(?: [0-9]+)?)\b"
     # Create a tokenizer using the custom pattern
     tokenizer = RegexpTokenizer(pattern)
     # Tokenize the given text
