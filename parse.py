@@ -4,7 +4,7 @@ import math
 import ujson as json
 from bs4 import BeautifulSoup as BS
 from collections import Counter, OrderedDict
-from tokenizer import tokenize, check_for_duplicates
+from tokenizer import tokenize, check_for_duplicates, sim_hash
 from postings import Posting
 from partial_indexer import partial_index
 from tfidf import calculate_tfidf
@@ -18,6 +18,7 @@ P_R = ['p','q','r']
 S_U = ['s','t','u']
 V_X = ['v','w','x']
 Y_Z = ['y','z']
+PREVIOUS_HASH = [] # Hash where each int is an element of a binary number
 
 # Key: token, Value: list of Postings
 index_A_C = {}
@@ -48,7 +49,7 @@ def build_index(directories: str) -> None:
     """
 
     global index_A_C, index_D_F, index_G_I, index_J_L, index_M_O, index_P_R,\
-        index_S_U, index_V_X, index_Y_Z, index_misc
+        index_S_U, index_V_X, index_Y_Z, index_misc, PREVIOUS_HASH
 
     ID: int = 0 # id of file
     count: int = 0
@@ -74,10 +75,13 @@ def build_index(directories: str) -> None:
 
             page_text = BS(html_content, 'html.parser').get_text(strip=True)  # get plain text
 
-            if not check_for_duplicates(page_text): #check if page is a duplicate
+            if not check_for_duplicates(page_text): # skip if this page is an duplicate of one already visited
                 count += 1 #increment total files indexed
                 file_count += 1 #increment file count
-                tokens.extend([str(token).lower() for token in tokenize(page_text)]) #get tokens
+                tokens_list = tokenize(page_text)
+                if sim_hash(PREVIOUS_HASH, tokens_list):  # skip if this page is similar to one already visited
+                    continue
+                tokens.extend([str(token).lower() for token in tokens_list]) #get tokens
                 counter = Counter(tokens)  # automatically count all tokens (duplicates included)
                 total_terms = len(tokens)
                 tokens = list(OrderedDict.fromkeys(tokens))  # remove duplicates
