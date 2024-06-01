@@ -59,6 +59,7 @@ if __name__ == '__main__':
             continue
         for r in list(results)[:5]: #print the first 5 results to the console ( for now )
             print(f'{id_ref[r]}')
+            print(f'Ranking is {r[1]}.')
             #results is a list of doc IDs, so we use id_ref to get the url
             # associated with the ID
         query = input('Enter query: ("~" to quit)\n')

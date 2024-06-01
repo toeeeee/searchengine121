@@ -136,6 +136,7 @@ def calculate_tfidf(total_documents):
                         posting['tfidf'] = 2
                     else:
                         posting['tfidf'] = tfidf
+                        posting['tfidf2'] = tfidf ** 2
                         posting['tf'] = tf
                 #index_content = {key: postings}
                 writefile.write(f'{{"{key}": {postings}}}\n')  # write this data into the main index file
