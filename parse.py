@@ -8,6 +8,7 @@ from postings import Posting
 from partial_indexer import partial_index
 from tfidf import calculate_tfidf
 
+# if files start with these chars, they'll be placed in the corresponding index
 A_C = ['a','b','c']
 D_F = ['d','e','f']
 G_I = ['g','h','i']
@@ -18,7 +19,7 @@ S_U = ['s','t','u']
 V_X = ['v','w','x']
 Y_Z = ['y','z']
 
-# Key: token, Value: list of Postings
+# dict( Key: token, Value: list of Postings, ... )
 index_A_C = {}
 index_D_F = {}
 index_G_I = {}
@@ -30,9 +31,12 @@ index_V_X = {}
 index_Y_Z = {}
 index_misc = {}
 
-index_list = ['index_A_C.txt', 'index_D_F.txt', 'index_G_I.txt', 'index_J_L.txt',
-              'index_M_O.txt', 'index_P_R.txt', 'index_S_U.txt',
-              'index_V_X.txt', 'index_Y_Z.txt', 'index_misc.txt']
+index_list = [
+    'index_A_C.txt', 'index_D_F.txt', 'index_G_I.txt', 
+    'index_J_L.txt', 'index_M_O.txt', 'index_P_R.txt',
+    'index_S_U.txt', 'index_V_X.txt', 'index_Y_Z.txt',
+    'index_misc.txt'
+]
 
 def build_index(directories: str) -> None:
     """
@@ -83,25 +87,25 @@ def build_index(directories: str) -> None:
             else:
                 title = "no title"
 
-            if not check_for_duplicates(page_text): #check if page is a duplicate
-                count += 1 #increment total files indexed
-                file_count += 1 #increment file count
-                tokens.extend([str(token).lower() for token in tokenize(page_text)]) #get tokens
+            if not check_for_duplicates(page_text):  # check if page is a duplicate
+                count += 1  # increment total files indexed
+                file_count += 1  # increment file count
+                tokens.extend([str(token).lower() for token in tokenize(page_text)])  # get tokens
                 counter = Counter(tokens)  # automatically count all tokens (duplicates included)
                 total_terms = len(tokens)
                 tokens = list(OrderedDict.fromkeys(tokens))  # remove duplicates
                 ID += 1
 
                 for token in tokens:
-                    freq = counter[token] #get the frequency that the token appears in the doc
+                    freq = counter[token]  # get the frequency that the token appears in the doc
                     first_char = token[0]
-                    #get the first character of token to determine which index to save it to
+                    # get the first character of token to determine which index to save it to
                     choose_index(token, first_char, freq, ID, url, total_terms, title)
 
-                if file_count >= 18465: #if file chunk limit is reached
-                    update_unique_tokens(t_set) #update the set of unique tokens
-                    write_to_files() #write indexes to their files
-                    index_A_C = {} #reset the local indexes
+                if file_count >= 18465:  # if file chunk limit is reached
+                    update_unique_tokens(t_set)  # update the set of unique tokens
+                    write_to_files()  # write indexes to their files
+                    index_A_C = {}  # reset the local indexes
                     index_D_F = {}
                     index_G_I = {}
                     index_J_L = {}
@@ -111,15 +115,15 @@ def build_index(directories: str) -> None:
                     index_V_X = {}
                     index_Y_Z = {}
                     index_misc = {}
-                    file_count = 0 #reset the file chunk count
+                    file_count = 0  # reset the file chunk count
                     print('Index size limit reached, saving to files.\n')
                     print('Working...\n')
 
-    update_unique_tokens(t_set) #update unique tokens after finished
-    write_to_files() #write remaining index to files after finishing
+    update_unique_tokens(t_set)  # update unique tokens after finished
+    write_to_files()  # write remaining index to files after finishing
     print('End of files reached. Saved chunks to disk.\n')
 
-    with open('a3_analytics.txt', 'w') as out: #write basic analytics to text file
+    with open('a3_analytics.txt', 'w') as out:  # write basic analytics to text file
         out.write(f'Number of indexed documents: {count}\nNumber of unique tokens: {len(t_set)}\n')
 
     print('Done!\n')
@@ -168,7 +172,16 @@ def update_index(token, freq, ID, url, index, total_terms, title) -> None:
 
 
 def update_unique_tokens(t_set: set) -> None:
-    #update the set of unique tokens
+    """
+    update the set of unique tokens
+    
+    Parameter(s)
+    t_set:
+
+    Return:
+    None
+    """
+    
     t_set.update(list(index_A_C.keys()))
     t_set.update(list(index_D_F.keys()))
     t_set.update(list(index_G_I.keys()))
@@ -181,8 +194,17 @@ def update_unique_tokens(t_set: set) -> None:
     t_set.update(list(index_misc.keys()))
 
 
-def write_to_files():
-    #write each index to its respective file
+def write_to_files() -> None:
+    """
+    write each index to its respective file
+    
+    Parameter(s)
+    None
+
+    Return:
+    None
+    """
+
     _write_to_file(index_A_C, 'index_A_C.txt')
     _write_to_file(index_D_F, 'index_D_F.txt')
     _write_to_file(index_G_I, 'index_G_I.txt')

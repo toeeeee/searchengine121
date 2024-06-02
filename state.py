@@ -1,5 +1,8 @@
 class State:
-    """Class to hold partial index data and queries"""
+    """
+    Class to hold partial index data and queries
+    """
+    
     def __init__(self):
         self.partial_index = None
         self.query = None

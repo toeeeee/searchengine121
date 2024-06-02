@@ -3,8 +3,18 @@ from tokenizer import tokenize
 import os
 
 
-def calculate_tf_tq(given_term: str, query: set):
-    """Calculate tf for term in a query"""
+def calculate_tf_tq(given_term: str, query: set) -> float:
+    """
+    Calculate tf for term in a query
+    
+    Parameter(s)
+    given_term: the tf_tq score calculated for this term
+    query: set object of individual words searched for by user
+
+    Return
+    tf: term frequency score
+    """
+    
     freq = 0
     total_terms = 0
     for term in query:
@@ -17,20 +27,24 @@ def calculate_tf_tq(given_term: str, query: set):
         tf = 1 + log(freq)
     return tf
 
-def calculate_weight_tq(tf, idf):
+
+def calculate_tfidf(total_documents: int) -> None:
     """
-    Calculate tfidf for a term in a query
+    Calculate tf for term in a query
+    
+    Parameter(s)
+    total_documents: total number of documents, used to calculate tfidf score
+
+    Return
+    None
     """
-
-
-
-def calculate_tfidf(total_documents):
+    
     with open('tfidf_index.txt', 'w') as writefile:
         with open('main_index.txt', 'r') as file:
             line = file.readline()
-            while line: #each line is an index
+            while line:  # each line is an index
                 index_content = eval(line)
-                key  = list(index_content.keys())[0] # this gives us the key
+                key  = list(index_content.keys())[0]  # this gives us the key
                 postings = index_content[key]
 
                 df = len(postings)
@@ -39,7 +53,7 @@ def calculate_tfidf(total_documents):
                 for posting in postings:
                     times_term_appears = posting['frequency']
                     total_terms_in_document = posting['total_terms']
-                    #tf = times_term_appears / total_terms_in_document
+                    # tf = times_term_appears / total_terms_in_document
                     if times_term_appears <= 0:
                         tf = 0
                     else:
@@ -52,9 +66,9 @@ def calculate_tfidf(total_documents):
                         posting['tfidf2'] = tfidf ** 2
                         posting['tf'] = tf
                         posting['idf'] = idf
-                #index_content = {key: postings}
+                # index_content = {key: postings}
                 writefile.write(f'{{"{key}": {postings}}}\n')  # write this data into the main index file
                 line = file.readline()
     os.remove('main_index.txt')  # delete the index chunk from disk
 
-#out.write(f'{{"{key}": {value}}}\n')
+# out.write(f'{{"{key}": {value}}}\n')
