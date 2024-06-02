@@ -70,7 +70,7 @@ def search(query: set, state, t): #main search function
             wtd_vectors[docid][term] /= len_wtd
 
         sum_w_td_2 = 0
-
+        
     rank = 0
     for docid in wtd_vectors:
         for term in wtd_vectors[docid]:
