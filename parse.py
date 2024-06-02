@@ -17,6 +17,10 @@ P_R = ['p','q','r']
 S_U = ['s','t','u']
 V_X = ['v','w','x']
 Y_Z = ['y','z']
+o_t = ['0','1','2']
+t_f = ['3','4','5']
+s_n = [6,'7','8','8','9']
+
 
 # Key: token, Value: list of Postings
 index_A_C = {}
@@ -28,11 +32,15 @@ index_P_R = {}
 index_S_U = {}
 index_V_X = {}
 index_Y_Z = {}
+index_onetwo = {}
+index_threefive = {}
+index_sixnine = {}
 index_misc = {}
 
 index_list = ['index_A_C.txt', 'index_D_F.txt', 'index_G_I.txt', 'index_J_L.txt',
               'index_M_O.txt', 'index_P_R.txt', 'index_S_U.txt',
-              'index_V_X.txt', 'index_Y_Z.txt', 'index_misc.txt']
+              'index_V_X.txt', 'index_Y_Z.txt', 'index_onetwo', 'index_threefive', 'index_sixnine',
+              'index_misc.txt']
 
 def build_index(directories: str) -> None:
     """
@@ -47,7 +55,7 @@ def build_index(directories: str) -> None:
     """
 
     global index_A_C, index_D_F, index_G_I, index_J_L, index_M_O, index_P_R,\
-        index_S_U, index_V_X, index_Y_Z, index_misc
+        index_S_U, index_V_X, index_Y_Z, index_misc, index_onetwo, index_threefive, index_sixnine
 
     ID: int = 0 # id of file
     count: int = 0
@@ -110,6 +118,9 @@ def build_index(directories: str) -> None:
                     index_S_U = {}
                     index_V_X = {}
                     index_Y_Z = {}
+                    index_onetwo = {}
+                    index_threefive = {}
+                    index_sixnine = {}
                     index_misc = {}
                     file_count = 0 #reset the file chunk count
                     print('Index size limit reached, saving to files.\n')
@@ -155,7 +166,13 @@ def choose_index(token, first_char, freq, ID, url, total_terms, title) -> None:
     elif first_char in V_X:
         update_index(token, freq, ID, url, index_V_X, total_terms, title)
     elif first_char in Y_Z:
-        update_index(token, freq, ID, url, index_Y_Z, total_terms, title)
+        update_index(token, freq, ID, url, index_Y_Z,total_terms, title)
+    elif first_char in o_t:
+        update_index(token,freq,ID,url,index_onetwo,total_terms, title)
+    elif first_char in t_f:
+        update_index(token, freq, ID, url, index_threefive, total_terms, title)
+    elif first_char in s_n:
+        update_index(token, freq, ID, url, index_sixnine,total_terms, title)
     else:
         update_index(token, freq, ID, url, index_misc, total_terms, title)
 
@@ -178,6 +195,9 @@ def update_unique_tokens(t_set: set) -> None:
     t_set.update(list(index_S_U.keys()))
     t_set.update(list(index_V_X.keys()))
     t_set.update(list(index_Y_Z.keys()))
+    t_set.update(list(index_onetwo.keys()))
+    t_set.update(list(index_threefive.keys()))
+    t_set.update(list(index_sixnine.keys()))
     t_set.update(list(index_misc.keys()))
 
 
@@ -192,6 +212,9 @@ def write_to_files():
     _write_to_file(index_S_U, 'index_S_U.txt')
     _write_to_file(index_V_X, 'index_V_X.txt')
     _write_to_file(index_Y_Z, 'index_Y_Z.txt')
+    _write_to_file(index_onetwo, 'index_onefive.txt')
+    _write_to_file(index_threefive, 'index_threefive.txt')
+    _write_to_file(index_sixnine, 'index_sixnine.txt')
     _write_to_file(index_misc, 'index_misc.txt')
 
 def _write_to_file(index, filename):
