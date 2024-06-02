@@ -59,6 +59,7 @@ def build_index(directories: str) -> None:
     for root, dirs, files in os.walk(directories):  # traverse dirs & get files at all levels
         for file in files:  # iterate over every file in the directory
             path = os.path.join(root, file)
+            print(path)
             tokens = [] # new list for each file!
 
             if ".DS_Store" in path:  # this file is hidden in the dir, and isn't a json file; skip it if found
@@ -105,11 +106,11 @@ def build_index(directories: str) -> None:
             else:
                 title = "No title"
 
-            bolds = soup.findAll('b')
+            bolds = soup.findAll('b')[0:4] # pick 5 randos
+            bolds = set(bolds) # remove dupes
             bolds_strs = []
             for bold in bolds:
                 bolds_strs.append(bold.string)
-            bolds_strs = list(set(bolds_strs)) # remove dupes
 
 
             if not check_for_duplicates(page_text): #check if page is a duplicate
@@ -262,7 +263,7 @@ def _write_to_file(index, filename):
 def merge_indices(): #merges all the index files that were created
     with open('main_index.txt', 'w', encoding='utf-8') as file:
         for index in index_list:
-            with open(index, 'r') as infile:
+            with open(index, 'r', encoding='utf-8') as infile:
                 data = infile.readlines() #get the data from the file
             file.writelines(data) #write this data into the main index file
             os.remove(index) #delete the index chunk from disk
