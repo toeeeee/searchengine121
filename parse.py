@@ -137,8 +137,31 @@ def build_index(directories: str) -> None:
     partial_index() #create a partial index from the main index
     print('Done! \n')
 
-def choose_index(token, first_char, freq, ID, url, total_terms, title) -> None:
-    #chooses which index to update based on the token (alphabetical)
+def choose_index(
+        token: str, 
+        first_char: str, 
+        freq: int, 
+        ID: int, 
+        url: str, 
+        total_terms: int, 
+        title: str) -> None:
+    
+    """
+    chooses which index to update based on the token (alphabetical)
+
+    Parameter(s)
+    token: a word
+    first_char: the first char of the 
+    freq: frequency of token's appearnce
+    ID: DocID of the url
+    url: the url the token was foud in
+    total_terms: total # of tokens from the url
+    title: 
+
+    Return
+    None
+    """
+
     global index_A_C, index_D_F, index_G_I, index_J_L, index_M_O,\
             index_P_R, index_S_U, index_V_X, index_Y_Z, index_misc
 
@@ -252,7 +275,17 @@ def _write_to_file(index, filename):
                 out.write(f'{{"{key}": {value}}}\n')
 
 
-def merge_indices(): #merges all the index files that were created
+def merge_indices() -> None:
+    """
+    merges all the index files that were created
+    
+    Parameter(s)
+    None
+
+    Return
+    None
+    """
+    
     with open('main_index.txt', 'w') as file:
         for index in index_list:
             with open(index, 'r') as infile:

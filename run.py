@@ -48,6 +48,7 @@ if __name__ == '__main__':
     print('Loading...\n')
     index_file = open('tfidf_index.txt', 'r')
     search_data = load_partial_indices() #load the partial index on disk
+    print('---------------------------')
     query: str = input('Enter query: ("~" to quit)\n') #prompt for query
 
     while query != '~':
@@ -63,19 +64,22 @@ if __name__ == '__main__':
         #search for documents with the given query, get a list of doc IDs and an ID and url reference
         results, id_ref = search(terms, search_data, start_time)
         if not results: #if no results, ask for another query
-            print(f"No results for: {query}")
+            print(f"No results for: {query}\n")
+            print('---------------------------\n')
             query = input("Enter query: ('~' to quit)\n")
             continue
         results = {key: val for key,val in sorted(results.items(), key=lambda item: item[1], reverse = True)}
-        i = 0
+        i = 1
+        print("RANKINGS:")
         for docid in results: #print the first 5 results to the console ( for now )
-            if i >= 5:
+            if i >= 6:
                 break
-            print(f"Ranking: {round(results[docid], 3)}.")
-            print(f"link: {id_ref[docid][0]}\n")
+            print(f"{i}. Ranking: {round(results[docid], 3)}.")
+            print(f"   Link: {id_ref[docid][0]}\n")
             #results is a list of doc IDs, so we use id_ref to get the url
             # associated with the ID
             i += 1
+        print('---------------------------')
         query = input("Enter query: ('~' to quit)\n")
 
     print('Goodbye!')

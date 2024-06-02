@@ -65,6 +65,7 @@ def search(query: set, state, t) -> tuple:
 
             results.update(curr_results)  # add the results to the main results
         except KeyError:  # if the key does not exist in the partial index, nothing was found
+            # print(f"KeyError: can't find term '{term}' in partial_index.\n")
             continue
 
     # CALCULATE NORMALIZED WEIGHTS FOR wtq
@@ -96,5 +97,6 @@ def search(query: set, state, t) -> tuple:
 
     end_time = timer() # for time testing
     print(f"\nquery time: {round(((end_time - t) * 1000), 3)} milliseconds.\n")
+    # print(f"\nquery time: {round((end_time - t), 3)} seconds.\n")
     
     return results, posting_id_ref #return the intersection and the doc ID to url reference
