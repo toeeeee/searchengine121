@@ -1,4 +1,3 @@
-import globals
 import hashlib
 from sqllite_context_manager import SQLite
 from nltk.stem import PorterStemmer
