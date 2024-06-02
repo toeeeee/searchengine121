@@ -1,6 +1,5 @@
 import ast
 import os
-import math
 import ujson as json
 from bs4 import BeautifulSoup as BS
 from collections import Counter, OrderedDict
@@ -65,6 +64,7 @@ def build_index(directories: str) -> None:
             if ".DS_Store" in path:  # this file is hidden in the dir, and isn't a json file; skip it if found
                 continue
 
+            print(path)
             js_file = open(path)  # open the file
             js_data = json.load(js_file)  # get file contents
             js_file.close()  # close the file

@@ -10,10 +10,6 @@ class Posting:
         self.frequency = frequency
         self.url = url
         self.total_terms = total_terms
-        self.tfidf = 0
 
     def to_dictionary(self): #convert a Posting into a dictionary of its attributes
-        return {'ID': self.ID, 'frequency': self.frequency, 'url': self.url, 'total_terms': self.total_terms, 'tfidf': self.tfidf}
-
-    def set_tfidf(self, tfidf):
-        self.tfidf = tfidf
+        return {'ID': self.ID, 'frequency': self.frequency, 'url': self.url, 'total_terms': self.total_terms}
