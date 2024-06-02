@@ -25,7 +25,7 @@ def calculate_weight_tq(tf, idf):
 
 
 def calculate_tfidf(total_documents):
-    with open('tfidf_index.txt', 'w') as writefile:
+    with open('tfidf_index.txt', 'w', encoding = 'utf-8') as writefile:
         with open('main_index.txt', 'r') as file:
             line = file.readline()
             while line: #each line is an index
