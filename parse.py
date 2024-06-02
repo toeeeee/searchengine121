@@ -109,6 +109,7 @@ def build_index(directories: str) -> None:
             bolds_strs = []
             for bold in bolds:
                 bolds_strs.append(bold.string)
+            bolds_strs = list(set(bolds_strs)) # remove dupes
 
 
             if not check_for_duplicates(page_text): #check if page is a duplicate
