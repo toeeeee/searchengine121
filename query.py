@@ -43,7 +43,7 @@ def search(query: set, state, t): #main search function
 
             for posting in data[term]:
                 curr_results.update({posting['ID']: 0}) #add the IDs of results to current results w 0 rank
-                posting_id_ref[posting['ID']] = posting['url'] #update the id reference dictionary
+                posting_id_ref[posting['ID']] = (posting['url'], posting['title']) #update the id reference dictionary
 
                 w_td = posting['tf'] # WEIGHT FOR SPEC TERM IN A DOC THAT GETS CYCLED THRU
                 if term in wtd_vectors:
@@ -76,6 +76,8 @@ def search(query: set, state, t): #main search function
         for term in wtd_vectors[docid]:
             if term in wtq_vector:
                 rank += (wtq_vector[term] * wtd_vectors[docid][term])
+            if term in posting_id_ref[docid][1]:
+                rank += 2
         #done
         results[docid] = rank
         rank = 0
