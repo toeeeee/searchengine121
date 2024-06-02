@@ -53,11 +53,11 @@ if __name__ == '__main__':
             terms = set([term for term in terms if term not in STOP_WORDS]) #remove stop words from the query
         #search for documents with the given query, get a list of doc IDs and an ID and url reference
         results, id_ref = search(terms, search_data, start_time)
-        results = {key: val for key,val in sorted(results.items(), key=lambda item: item[1], reverse = True)}
         if not results: #if no results, ask for another query
             print(f'No results for: {query}')
             query = input('Enter query: ("~" to quit)\n')
             continue
+        results = {key: val for key,val in sorted(results.items(), key=lambda item: item[1], reverse = True)}
 
         print(f"Total documents found: {len(results)}")
         i = 0

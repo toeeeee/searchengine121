@@ -52,11 +52,8 @@ def search(query: set, state, t): #main search function
                     wtd_vectors[posting['ID']] = {term: w_td}
 
             results.update(curr_results) #add the results to the main results
-        finally:
-            """"""
-        #except KeyError: #if the key does not exist in the partial index, nothing was found
-            #print('error')
-            #return None, None
+        except KeyError: #if the key does not exist in the partial index, nothing was found
+            continue
 
     # CALCULATE NORMALIZED WEIGHTS FOR wtq
     len_wtq = sqrt(sum_w_tq_2)
@@ -73,7 +70,7 @@ def search(query: set, state, t): #main search function
             wtd_vectors[docid][term] /= len_wtd
 
         sum_w_td_2 = 0
-
+        
     rank = 0
     for docid in wtd_vectors:
         for term in wtd_vectors[docid]:

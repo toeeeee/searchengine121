@@ -250,8 +250,8 @@ def _write_to_file(index, filename):
                     d[key].extend(value)
                     del index[key] #delete the appended item from the current index
 
-        with open(filename, 'w') as out:
-            data = [str(d) + '\n' for d in data] #convert the index back into the string format
+        with open(filename, 'w', encoding = 'utf-8') as out:
+            data = [str(d) + '\n' for d in data] #convert the index back ito the string format
             out.writelines(data) #write the data back to the file
             for key, value in sorted(index.items()):
                 #write the new items from the index into the end of the file
