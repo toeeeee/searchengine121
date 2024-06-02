@@ -233,11 +233,11 @@ def _write_to_file(index, filename):
 
 
     if not os.path.exists(filename): #check if file exists already
-        with open(filename, 'w') as out: #if it doesn't, simply write the index to the file
+        with open(filename, 'w', encoding='utf-8') as out: #if it doesn't, simply write the index to the file
             for key, value in sorted(index.items()): #writes one line per token
                 out.write(f'{{"{key}": {value}}}\n')
     else:
-        with open(filename, 'r') as out: #if it exists, load the index from the file to update it
+        with open(filename, 'r', encoding = 'utf-8') as out: #if it exists, load the index from the file to update it
             data = [ast.literal_eval(dic) for dic in out.readlines()]
             #collects the data and transforms each line into a usable dictionary
 
@@ -259,7 +259,7 @@ def _write_to_file(index, filename):
 
 
 def merge_indices(): #merges all the index files that were created
-    with open('main_index.txt', 'w') as file:
+    with open('main_index.txt', 'w', encoding='utf-8') as file:
         for index in index_list:
             with open(index, 'r') as infile:
                 data = infile.readlines() #get the data from the file
