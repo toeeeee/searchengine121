@@ -76,7 +76,7 @@ def build_index(directories: str) -> None:
             page_text = soup.get_text(strip=True)  # get plain text
 
             if soup.title:
-                title = soup.title.string.encode('ascii, ignore').decode('ascii', 'ignore')
+                title = soup.title.string.encode('ascii', 'ignore').decode('ascii', 'ignore')
             else:
                 title = "no title"
 
