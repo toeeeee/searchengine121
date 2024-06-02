@@ -51,6 +51,10 @@ if __name__ == '__main__':
     query: str = input('Enter query: ("~" to quit)\n') #prompt for query
 
     while query != '~':
+        while not query:
+            query = input("Enter query: ('~' to quit)\n")
+        raw_q_string = query
+
         start_time = timer() #for time testing
         search_data.set_query(query) #set the query attribute in the State object
         search_data.set_main_index(index_file)
@@ -61,7 +65,7 @@ if __name__ == '__main__':
         else:
             terms = set([term for term in terms if term not in STOP_WORDS]) #remove stop words from the query
         #search for documents with the given query, get a list of doc IDs and an ID and url reference
-        results, id_ref = search(terms, search_data, start_time)
+        results, id_ref = search(terms, raw_q_string, search_data, start_time)
         if not results: #if no results, ask for another query
             print(f"No results for: {query}")
             query = input("Enter query: ('~' to quit)\n")

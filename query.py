@@ -5,7 +5,7 @@ from math import sqrt
 search_data = None #global State object for accessing index data
 
 
-def search(query: set, state, t) -> tuple:
+def search(query: set, raw_q, state, t) -> tuple:
     """
     Main search function: search and also compute ranking
     
@@ -89,7 +89,13 @@ def search(query: set, state, t) -> tuple:
             if term in wtq_vector:
                 rank += (wtq_vector[term] * wtd_vectors[docid][term])
             if term in posting_id_ref[docid][1]:
-                rank += 2
+                rank += .1
+            if term in posting_id_ref[docid][0]:
+                rank += .5
+            if raw_q in posting_id_ref[docid][1]:
+                rank += .1
+            if raw_q in posting_id_ref[docid][0]:
+                rank += 5
         # done
         results[docid] = rank
         rank = 0

@@ -59,9 +59,9 @@ def calculate_tfidf(total_documents: int) -> None:
                     else:
                         tf = 1 + log(times_term_appears)
                     tfidf = tf * idf
-                    if tfidf > 10:
-                        posting['tfidf'] = 10
-                        posting['tfidf2'] = 100
+                    if tfidf > 2:
+                        posting['tfidf'] = 2
+                        posting['tfidf2'] = 4
                         posting['tf'] = tf
                         posting['idf'] = idf
                     else:
