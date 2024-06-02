@@ -5,8 +5,21 @@ from math import sqrt
 search_data = None #global State object for accessing index data
 
 
-def search(query: set, state, t): #main search function
-    """Search and also compute ranking :sob:"""
+def search(query: set, state, t) -> tuple:
+    """
+    Main search function: search and also compute ranking
+    
+    Parameter(s)
+    query: set of words the user inputted to the search engine
+    state: 
+    t: time object, used to measure how long it took to return results for user query
+
+    Return
+    tuple (results, posting_id_ref)
+    * results: 
+    * posting_id_ref: 
+    """
+
     global search_data
     search_data = state
 
@@ -27,37 +40,36 @@ def search(query: set, state, t): #main search function
 
         # FETCH POSTING LIST FOR TERM
         try:
-            byte = search_data.partial_index[term] #get the byte where the term appears in the index
-            search_data.main_index.seek(byte) #navigate to the byte
+            byte = search_data.partial_index[term]  # get the byte where the term appears in the index
+            search_data.main_index.seek(byte)  # navigate to the byte
             data = search_data.main_index.readline()
             data = eval(data)
-            #convert the line into a dictionary with eval() function
+            # convert the line into a dictionary with eval() function
 
-            for posting in data[term]:
-                idf_tD = posting['idf']
-                break
+            idf_tD = data[term][0]['idf']
+            # print(f"data: {idf_tD}")
 
-            w_tq = tf_tq * idf_tD # WEIGHT FOR SPEC. TERM IN QUERY
+            w_tq = tf_tq * idf_tD  # WEIGHT FOR SPEC. TERM IN QUERY
             wtq_vector[term] = w_tq
             sum_w_tq_2 += (w_tq ** 2)
 
             for posting in data[term]:
-                curr_results.update({posting['ID']: 0}) #add the IDs of results to current results w 0 rank
-                posting_id_ref[posting['ID']] = (posting['url'], posting['title']) #update the id reference dictionary
+                curr_results.update({posting['ID']: 0})  # add the IDs of results to current results w 0 rank
+                posting_id_ref[posting['ID']] = (posting['url'], posting['title'])  # update the id reference dictionary
 
-                w_td = posting['tf'] # WEIGHT FOR SPEC TERM IN A DOC THAT GETS CYCLED THRU
+                w_td = posting['tf']  # WEIGHT FOR SPEC TERM IN A DOC THAT GETS CYCLED THRU
                 if term in wtd_vectors:
                     wtd_vectors[posting['ID']][term] = w_td
                 else:
                     wtd_vectors[posting['ID']] = {term: w_td}
 
-            results.update(curr_results) #add the results to the main results
-        except KeyError: #if the key does not exist in the partial index, nothing was found
+            results.update(curr_results)  # add the results to the main results
+        except KeyError:  # if the key does not exist in the partial index, nothing was found
             continue
 
     # CALCULATE NORMALIZED WEIGHTS FOR wtq
     len_wtq = sqrt(sum_w_tq_2)
-    for wordd, wtq in wtq_vector.items():
+    for _, wtq in wtq_vector.items():
         wtq /= len_wtq
 
     # FOR wtd
@@ -78,11 +90,11 @@ def search(query: set, state, t): #main search function
                 rank += (wtq_vector[term] * wtd_vectors[docid][term])
             if term in posting_id_ref[docid][1]:
                 rank += 2
-        #done
+        # done
         results[docid] = rank
         rank = 0
 
-    end_time = timer() #for time testing
-    print(end_time - t)
-    print(' seconds.')
+    end_time = timer() # for time testing
+    print(f"\nquery time: {round(((end_time - t) * 1000), 3)} milliseconds.\n")
+    
     return results, posting_id_ref #return the intersection and the doc ID to url reference
