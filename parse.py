@@ -62,7 +62,7 @@ def build_index(directories: str) -> None:
             print(path)
             tokens = [] # new list for each file!
 
-            if ".DS_Store" in path:  # this file is hidden in the dir, and isn't a json file; skip it if found
+            if ".DS_Store" in path or ".desktop.ini" in path:  # this file is hidden in the dir, and isn't a json file; skip it if found
                 continue
 
             js_file = open(path)  # open the file
@@ -106,11 +106,11 @@ def build_index(directories: str) -> None:
             else:
                 title = "No title"
 
-            bolds = soup.findAll('b')[0:4] # pick 5 randos
-            bolds = set(bolds) # remove dupes
-            bolds_strs = []
-            for bold in bolds:
-                bolds_strs.append(bold.string)
+            #bolds = soup.findAll('b')[0:4] # pick 5 randos
+            #bolds = set(bolds) # remove dupes
+            #bolds_strs = []
+            #for bold in bolds:
+            #    bolds_strs.append(bold.string)
 
 
             if not check_for_duplicates(page_text): #check if page is a duplicate
@@ -126,7 +126,7 @@ def build_index(directories: str) -> None:
                     freq = counter[token] #get the frequency that the token appears in the doc
                     first_char = token[0]
                     #get the first character of token to determine which index to save it to
-                    choose_index(token, first_char, freq, ID, url, total_terms, title, bolds_strs)
+                    choose_index(token, first_char, freq, ID, url, total_terms, title)
 
                 if file_count >= 18465: #if file chunk limit is reached
                     update_unique_tokens(t_set) #update the set of unique tokens
@@ -163,38 +163,38 @@ def build_index(directories: str) -> None:
     partial_index() #create a partial index from the main index
     print('Done! \n')
 
-def choose_index(token, first_char, freq, ID, url, total_terms, title, bolds) -> None:
+def choose_index(token, first_char, freq, ID, url, total_terms, title) -> None:
     #chooses which index to update based on the token (alphabetical)
     global index_A_C, index_D_F, index_G_I, index_J_L, index_M_O,\
             index_P_R, index_S_U, index_V_X, index_Y_Z, index_misc
 
     if first_char in A_C:
-        update_index(token, freq, ID, url, index_A_C, total_terms, title, bolds)
+        update_index(token, freq, ID, url, index_A_C, total_terms, title)
     elif first_char in D_F:
-        update_index(token, freq, ID, url, index_D_F, total_terms, title, bolds)
+        update_index(token, freq, ID, url, index_D_F, total_terms, title)
     elif first_char in G_I:
-        update_index(token, freq, ID, url, index_G_I, total_terms, title, bolds)
+        update_index(token, freq, ID, url, index_G_I, total_terms, title)
     elif first_char in J_L:
-        update_index(token, freq, ID, url, index_J_L, total_terms, title, bolds)
+        update_index(token, freq, ID, url, index_J_L, total_terms, title)
     elif first_char in M_O:
-        update_index(token, freq, ID, url, index_M_O, total_terms, title, bolds)
+        update_index(token, freq, ID, url, index_M_O, total_terms, title)
     elif first_char in P_R:
-        update_index(token, freq, ID, url, index_P_R, total_terms, title, bolds)
+        update_index(token, freq, ID, url, index_P_R, total_terms, title)
     elif first_char in S_U:
-        update_index(token, freq, ID, url, index_S_U, total_terms, title, bolds)
+        update_index(token, freq, ID, url, index_S_U, total_terms, title)
     elif first_char in V_X:
-        update_index(token, freq, ID, url, index_V_X, total_terms, title, bolds)
+        update_index(token, freq, ID, url, index_V_X, total_terms, title)
     elif first_char in Y_Z:
-        update_index(token, freq, ID, url, index_Y_Z, total_terms, title, bolds)
+        update_index(token, freq, ID, url, index_Y_Z, total_terms, title)
     else:
-        update_index(token, freq, ID, url, index_misc, total_terms, title, bolds)
+        update_index(token, freq, ID, url, index_misc, total_terms, title)
 
-def update_index(token, freq, ID, url, index, total_terms, title, bolds) -> None:
+def update_index(token, freq, ID, url, index, total_terms, title) -> None:
     #update the given index with a token and Posting values
     if token not in index.keys():
-        index[token] = [Posting(ID, freq, url, total_terms, title, bolds)]
+        index[token] = [Posting(ID, freq, url, total_terms, title)]
     else:
-        index[token].append(Posting(ID, freq, url, total_terms, title, bolds))
+        index[token].append(Posting(ID, freq, url, total_terms, title))
 
 
 def update_unique_tokens(t_set: set) -> None:
@@ -235,11 +235,11 @@ def _write_to_file(index, filename):
 
 
     if not os.path.exists(filename): #check if file exists already
-        with open(filename, 'w', encoding='utf-8') as out: #if it doesn't, simply write the index to the file
+        with open(filename, 'w') as out: #if it doesn't, simply write the index to the file
             for key, value in sorted(index.items()): #writes one line per token
                 out.write(f'{{"{key}": {value}}}\n')
     else:
-        with open(filename, 'r', encoding = 'utf-8') as out: #if it exists, load the index from the file to update it
+        with open(filename, 'r') as out: #if it exists, load the index from the file to update it
             data = [ast.literal_eval(dic) for dic in out.readlines()]
             #collects the data and transforms each line into a usable dictionary
 
@@ -252,7 +252,7 @@ def _write_to_file(index, filename):
                     d[key].extend(value)
                     del index[key] #delete the appended item from the current index
 
-        with open(filename, 'w', encoding = 'utf-8') as out:
+        with open(filename, 'w') as out:
             data = [str(d) + '\n' for d in data] #convert the index back ito the string format
             out.writelines(data) #write the data back to the file
             for key, value in sorted(index.items()):
@@ -261,9 +261,9 @@ def _write_to_file(index, filename):
 
 
 def merge_indices(): #merges all the index files that were created
-    with open('main_index.txt', 'w', encoding='utf-8') as file:
+    with open('main_index.txt', 'w') as file:
         for index in index_list:
-            with open(index, 'r', encoding='utf-8') as infile:
+            with open(index, 'r') as infile:
                 data = infile.readlines() #get the data from the file
             file.writelines(data) #write this data into the main index file
             os.remove(index) #delete the index chunk from disk

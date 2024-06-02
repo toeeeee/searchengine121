@@ -78,10 +78,10 @@ def search(query: set, state, t): #main search function
                 rank += (wtq_vector[term] * wtd_vectors[docid][term])
             if term in posting_id_ref[docid][1]: # extra relevance for title
                 rank += 2
-            for bold in posting_id_ref[docid][2]:
-                if bold:
-                    if term in bold:
-                        rank += .3
+            #for bold in posting_id_ref[docid][2]:
+            #    if bold:
+            #        if term in bold:
+            #            rank += .3
 
         #done
         results[docid] = rank
