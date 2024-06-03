@@ -68,7 +68,7 @@ def build_index(directories: str) -> None:
             if ".DS_Store" in path:  # this file is hidden in the dir, and isn't a json file; skip it if found
                 continue
 
-            #print(path)
+            print(path)
             js_file = open(path)  # open the file
             js_data = json.load(js_file)  # get file contents
             js_file.close()  # close the file
@@ -87,12 +87,15 @@ def build_index(directories: str) -> None:
             else:
                 title = "no title"
 
-            bolds = soup.find_all('h1')
             bold_strs = ""
-            for bold in bolds:
-                if bold.string:
-                    bold_strs += bold.string.encode('ascii','ignore').decode('ascii','ignore')
-                    bold_strs += " "
+            bold = soup.find('h1')
+            if bold:
+                for i in range(5):
+                    if bold:
+                        if bold.string:
+                            bold_strs += bold.string.encode('ascii','ignore').decode('ascii','ignore')
+                            bold_strs += " "
+                        bold = bold.find_next('h1')
             boldkens = tokenize(bold_strs)
 
             if not check_for_duplicates(page_text):  # check if page is a duplicate
@@ -115,6 +118,7 @@ def build_index(directories: str) -> None:
                     choose_index(token, first_char, freq, ID, url, total_terms, title, in_bold)
 
                 if file_count >= 18465:  # if file chunk limit is reached
+                    print('Index size limit reached, saving to files.\n')
                     update_unique_tokens(t_set)  # update the set of unique tokens
                     write_to_files()  # write indexes to their files
                     index_A_C = {}  # reset the local indexes
@@ -128,7 +132,6 @@ def build_index(directories: str) -> None:
                     index_Y_Z = {}
                     index_misc = {}
                     file_count = 0  # reset the file chunk count
-                    print('Index size limit reached, saving to files.\n')
                     print('Working...\n')
 
     update_unique_tokens(t_set)  # update unique tokens after finished
