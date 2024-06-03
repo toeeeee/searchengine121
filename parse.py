@@ -87,6 +87,13 @@ def build_index(directories: str) -> None:
             else:
                 title = "no title"
 
+            bolds = soup.find_all('h1')
+            bold_strs = ""
+            for bold in bolds:
+                bold_strs += bold.string.encode('ascii','ignore').decode('ascii','ignore')
+                bold_strs += " "
+            boldkens = tokenize(bold_strs)
+
             if not check_for_duplicates(page_text):  # check if page is a duplicate
                 count += 1  # increment total files indexed
                 file_count += 1  # increment file count
@@ -99,8 +106,12 @@ def build_index(directories: str) -> None:
                 for token in tokens:
                     freq = counter[token]  # get the frequency that the token appears in the doc
                     first_char = token[0]
+                    in_bold = 0
+                    if token in boldkens:
+                        in_bold = 1
+
                     # get the first character of token to determine which index to save it to
-                    choose_index(token, first_char, freq, ID, url, total_terms, title)
+                    choose_index(token, first_char, freq, ID, url, total_terms, title, in_bold)
 
                 if file_count >= 18465:  # if file chunk limit is reached
                     update_unique_tokens(t_set)  # update the set of unique tokens
@@ -137,38 +148,38 @@ def build_index(directories: str) -> None:
     partial_index() #create a partial index from the main index
     print('Done! \n')
 
-def choose_index(token, first_char, freq, ID, url, total_terms, title) -> None:
+def choose_index(token, first_char, freq, ID, url, total_terms, title, in_bold) -> None:
     #chooses which index to update based on the token (alphabetical)
     global index_A_C, index_D_F, index_G_I, index_J_L, index_M_O,\
             index_P_R, index_S_U, index_V_X, index_Y_Z, index_misc
 
     if first_char in A_C:
-        update_index(token, freq, ID, url, index_A_C, total_terms, title)
+        update_index(token, freq, ID, url, index_A_C, total_terms, title, in_bold)
     elif first_char in D_F:
-        update_index(token, freq, ID, url, index_D_F, total_terms, title)
+        update_index(token, freq, ID, url, index_D_F, total_terms, title, in_bold)
     elif first_char in G_I:
-        update_index(token, freq, ID, url, index_G_I, total_terms, title)
+        update_index(token, freq, ID, url, index_G_I, total_terms, title, in_bold)
     elif first_char in J_L:
-        update_index(token, freq, ID, url, index_J_L, total_terms, title)
+        update_index(token, freq, ID, url, index_J_L, total_terms, title, in_bold)
     elif first_char in M_O:
-        update_index(token, freq, ID, url, index_M_O, total_terms, title)
+        update_index(token, freq, ID, url, index_M_O, total_terms, title, in_bold)
     elif first_char in P_R:
-        update_index(token, freq, ID, url, index_P_R, total_terms, title)
+        update_index(token, freq, ID, url, index_P_R, total_terms, title, in_bold)
     elif first_char in S_U:
-        update_index(token, freq, ID, url, index_S_U, total_terms, title)
+        update_index(token, freq, ID, url, index_S_U, total_terms, title, in_bold)
     elif first_char in V_X:
-        update_index(token, freq, ID, url, index_V_X, total_terms, title)
+        update_index(token, freq, ID, url, index_V_X, total_terms, title, in_bold)
     elif first_char in Y_Z:
-        update_index(token, freq, ID, url, index_Y_Z, total_terms, title)
+        update_index(token, freq, ID, url, index_Y_Z, total_terms, title, in_bold)
     else:
-        update_index(token, freq, ID, url, index_misc, total_terms, title)
+        update_index(token, freq, ID, url, index_misc, total_terms, title, in_bold)
 
-def update_index(token, freq, ID, url, index, total_terms, title) -> None:
+def update_index(token, freq, ID, url, index, total_terms, title, in_bold) -> None:
     #update the given index with a token and Posting values
     if token not in index.keys():
-        index[token] = [Posting(ID, freq, url, total_terms, title)]
+        index[token] = [Posting(ID, freq, url, total_terms, title, in_bold)]
     else:
-        index[token].append(Posting(ID, freq, url, total_terms, title))
+        index[token].append(Posting(ID, freq, url, total_terms, title, in_bold))
 
 
 def update_unique_tokens(t_set: set) -> None:

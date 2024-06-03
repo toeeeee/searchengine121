@@ -2,6 +2,7 @@ from state import State
 from query import search
 from tokenizer import tokenize
 from timeit import default_timer as timer
+import re
 
 STOP_WORDS = ["a", "about", "above", "after", "again", "against", "all", "am", "an", "and",
               "any", "are", "aren't", "as", "at", "be", "because", "been", "before", "being",
@@ -54,18 +55,27 @@ if __name__ == '__main__':
         while not query:
             query = input("Enter query: ('~' to quit)\n")
         raw_q_string = query
+        words = query.split()
+        if len(words) >= 7: # limit words in query
+            print("Query limited to 7 words or less")
+            reg_ex = r'\b(' + words[-1] + r')\b'
+            found = re.search(reg_ex, query)
+            query = query[0:found.start()]
 
         start_time = timer() #for time testing
         search_data.set_query(query) #set the query attribute in the State object
         search_data.set_main_index(index_file)
         terms = tokenize(query) #tokenize the query
+        stop_word_search = False
         stop_word_amt = len([t for t in terms if t in STOP_WORDS])
         if stop_word_amt / len(terms) > 0.8:
             terms = set(terms)
+            stop_word_search = True
+            print('Stopword Search!')
         else:
             terms = set([term for term in terms if term not in STOP_WORDS]) #remove stop words from the query
         #search for documents with the given query, get a list of doc IDs and an ID and url reference
-        results, id_ref = search(terms, raw_q_string, search_data, start_time)
+        results, id_ref = search(terms, raw_q_string, search_data, stop_word_search, start_time)
         if not results: #if no results, ask for another query
             print(f"No results for: {query}")
             query = input("Enter query: ('~' to quit)\n")

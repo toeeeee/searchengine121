@@ -1,0 +1,32 @@
+20 QUERIES WE USED:
+GOOD RESULTS
+- cristina lopes 5 ms
+- computer vision 257 ms
+- mondego 1 ms
+- acm 27.498
+- software engineering 207 ms
+- sql 26 ms
+- thornton 25 ms
+- icssc
+- ics33
+- machine learning
+
+
+NOT SO GREAT
+- master of software engineering, master of computer science, results not really relevant only somewhat...
+- github for same reasons
+- optimized by downplaying vague / unhelpful words / adjusting weights. also consider when "Master of Software Engineering" is in title
+
+- ics 33, words completely not relevant
+- consider when query is joined together and in url
+
+- ACM, didn't show any results with acm in it, but fixed by considering tokens when lowered and in title,
+- 26 ms when optimized
+
+- to be or not to be or some stop thing a about himself does further cannot above after, time at 3000 ms :skull:
+- limited words to 7 words or less and also limited posting retrieval, time at 128 ms
+
+- to be or not to be, time sucked was at 1000 ms
+- managed to reduce it down to 700 ms still sucks, but better
+
+
