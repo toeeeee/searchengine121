@@ -37,5 +37,3 @@ NOT SO GREAT
 
 - to be or not to be, time sucked was at 1000 ms
 - managed to reduce it down to 700 ms still sucks, but better
-- to be or not to be, time sucked was at 1000 ms
-- managed to reduce it down to 700 ms still sucks, but better
