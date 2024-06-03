@@ -68,7 +68,7 @@ def build_index(directories: str) -> None:
             if ".DS_Store" in path:  # this file is hidden in the dir, and isn't a json file; skip it if found
                 continue
 
-            print(path)
+            #print(path)
             js_file = open(path)  # open the file
             js_data = json.load(js_file)  # get file contents
             js_file.close()  # close the file
@@ -90,8 +90,9 @@ def build_index(directories: str) -> None:
             bolds = soup.find_all('h1')
             bold_strs = ""
             for bold in bolds:
-                bold_strs += bold.string.encode('ascii','ignore').decode('ascii','ignore')
-                bold_strs += " "
+                if bold.string:
+                    bold_strs += bold.string.encode('ascii','ignore').decode('ascii','ignore')
+                    bold_strs += " "
             boldkens = tokenize(bold_strs)
 
             if not check_for_duplicates(page_text):  # check if page is a duplicate
