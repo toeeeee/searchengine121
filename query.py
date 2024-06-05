@@ -1,6 +1,7 @@
 from timeit import default_timer as timer
 from tfidf import calculate_tf_tq
 from math import sqrt
+import re
 
 search_data = None #global State object for accessing index data
 
@@ -92,6 +93,10 @@ def search(query: set, raw_q, state, stop_words_enabled,  t) -> tuple:
 
     rank = 0
     for docid in wtd_vectors:
+        # Remove rank from file in url.
+        if re.match(r".*/(pdf|css|js|png|jpe&g|uploads|upload|calendar|login)/*", posting_id_ref[docid][0]):
+            rank -= 5
+        # Add rank to term or file in url, title, header
         for term in wtd_vectors[docid]:
             if term in wtq_vector:
                 rank += (wtq_vector[term] * wtd_vectors[docid][term])
@@ -117,6 +122,7 @@ def search(query: set, raw_q, state, stop_words_enabled,  t) -> tuple:
             if raw_q.title() in 'Master Of Software Engineering' and 'mswe' in posting_id_ref[docid][0]:
                 rank += 2
 
+        # Remove rank from more filler
             if term in vague_words:
                 rank -= 1
             if 'ngs' in posting_id_ref[docid][0]: # a lot of junk blog posts
