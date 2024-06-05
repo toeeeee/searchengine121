@@ -119,8 +119,8 @@ def search(query: set, raw_q, state, stop_words_enabled,  t) -> tuple:
                 rank += 10
             if ' '.join(raw_q.lower()) in posting_id_ref[docid][0]:
                 rank += 5
-            if raw_q.title() in 'Master Of Software Engineering' and 'mswe' in posting_id_ref[docid][0]:
-                rank += 2
+            if raw_q.title() == 'Master Of Software Engineering' and 'mswe' in posting_id_ref[docid][0]:
+                rank += 100
 
         # Remove rank from more filler
             if term in vague_words:
