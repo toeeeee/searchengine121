@@ -111,11 +111,14 @@ def build_index(directories: str) -> None:
                     freq = counter[token]  # get the frequency that the token appears in the doc
                     first_char = token[0]
                     in_bold = 0
+                    in_title = 0
                     if token in boldkens:
                         in_bold = 1
+                    if token in title:
+                        in_title = 1
 
                     # get the first character of token to determine which index to save it to
-                    choose_index(token, first_char, freq, ID, url, total_terms, title, in_bold)
+                    choose_index(token, first_char, freq, ID, url, total_terms, in_title, in_bold)
 
                 if file_count >= 18465:  # if file chunk limit is reached
                     print('Index size limit reached, saving to files.\n')

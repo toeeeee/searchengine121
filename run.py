@@ -45,52 +45,49 @@ def load_partial_indices() -> State:
 
     return search_state
 
-if __name__ == '__main__':
-    print('Loading...\n')
-    index_file = open('tfidf_index.txt', 'r')
-    search_data = load_partial_indices() #load the partial index on disk
-    query: str = input('Enter query: ("~" to quit)\n') #prompt for query
+def load_index():
+    return load_partial_indices()  # load the partial index on disk
 
-    while query != '~':
-        while not query:
-            query = input("Enter query: ('~' to quit)\n")
-        raw_q_string = query
-        words = query.split()
-        if len(words) >= 7: # limit words in query
-            print("Query limited to 7 words or less")
-            reg_ex = r'\b(' + words[-1] + r')\b'
-            found = re.search(reg_ex, query)
-            query = query[0:found.start()]
+def main(ss: State, query: str):
+    search_data = ss #load the partial index on disk
+    raw_q_string = query
+    words = query.split()
+    if len(words) >= 7: # limit words in query
+        print("Query limited to 7 words or less")
+        reg_ex = r'\b(' + words[-1] + r')\b'
+        found = re.search(reg_ex, query)
+        query = query[0:found.start()]
 
-        start_time = timer() #for time testing
-        search_data.set_query(query) #set the query attribute in the State object
-        search_data.set_main_index(index_file)
-        terms = tokenize(query) #tokenize the query
-        stop_word_search = False
-        stop_word_amt = len([t for t in terms if t in STOP_WORDS])
-        if stop_word_amt / len(terms) > 0.8:
-            terms = set(terms)
-            stop_word_search = True
-            print('Stopword Search!')
-        else:
-            terms = set([term for term in terms if term not in STOP_WORDS]) #remove stop words from the query
-        #search for documents with the given query, get a list of doc IDs and an ID and url reference
-        results, id_ref = search(terms, raw_q_string, search_data, stop_word_search, start_time)
-        if not results: #if no results, ask for another query
-            print(f"No results for: {query}")
-            query = input("Enter query: ('~' to quit)\n")
-            continue
-        results = {key: val for key,val in sorted(results.items(), key=lambda item: item[1], reverse = True)}
-        i = 0
-        for docid in results: #print the first 5 results to the console ( for now )
-            if i >= 5:
-                break
-            print(f"Ranking: {round(results[docid], 3)}.")
-            print(f"link: {id_ref[docid][0]}\n")
-            #results is a list of doc IDs, so we use id_ref to get the url
-            # associated with the ID
-            i += 1
-        query = input("Enter query: ('~' to quit)\n")
+    start_time = timer() #for time testing
+    search_data.set_query(query) #set the query attribute in the State object
+    terms = tokenize(query) #tokenize the query
+    stop_word_search = False
+    stop_word_amt = len([t for t in terms if t in STOP_WORDS])
+    if stop_word_amt / len(terms) > 0.8:
+        terms = set(terms)
+        stop_word_search = True
+        print('Stopword Search!')
+    else:
+        terms = set([term for term in terms if term not in STOP_WORDS]) #remove stop words from the query
+    #search for documents with the given query, get a list of doc IDs and an ID and url reference
+    results, id_ref = search(terms, raw_q_string, search_data, stop_word_search, start_time)
+    if not results: #if no results, ask for another query
+        print(f"No results for: {query}")
+    results =  {key: val for key,val in sorted(results.items(), key=lambda item: item[1], reverse = True)}
+    res_list = []
+    i = 0
+    for docid in results: #print the first 5 results to the console ( for now )
+        if i >= 5:
+            break
+        res_list.append(f"Ranking: {round(results[docid], 3)}.")
+        res_list.append(f"link: {id_ref[docid][0]}\n")
+        #results is a list of doc IDs, so we use id_ref to get the url
+        # associated with the ID
+        i += 1
+    return res_list
 
-    print('Goodbye!')
-    index_file.close() #keeping the index file open until the end, as per slides
+# if __name__ == '__main__':
+#     index_file = open('tfidf_index.txt', 'r')
+#     search_state = load_index()
+#     main(search_state)
+#     index_file.close()  # keeping the index file open until the end, as per slides

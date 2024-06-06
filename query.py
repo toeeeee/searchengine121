@@ -98,18 +98,18 @@ def search(query: set, raw_q, state, stop_words_enabled,  t) -> tuple:
             # title for term then url and then same for whole queue msg
             if posting_id_ref[docid][2]:
                 rank += 3
-            if term.title() in posting_id_ref[docid][1] or term in posting_id_ref[docid][1]:
+            if posting_id_ref[docid][1]:
                 rank += 3
             if term.lower() in posting_id_ref[docid][0]:
                 rank += 3
             for untokenized in raw_q.split():
-                if untokenized.title() in posting_id_ref[docid][1] or untokenized in posting_id_ref[docid][1]:
-                    rank += 3
+                # if untokenized.title() in posting_id_ref[docid][1] or untokenized in posting_id_ref[docid][1]:
+                #     rank += 3
                 if untokenized.lower() in posting_id_ref[docid][0]:
                     rank += 3
 
-            if raw_q.title() in posting_id_ref[docid][1] or raw_q in posting_id_ref[docid][1]:
-                rank += 10
+            # if raw_q.title() in posting_id_ref[docid][1] or raw_q in posting_id_ref[docid][1]:
+            #     rank += 10
             if raw_q in posting_id_ref[docid][0] or raw_q.lower() in posting_id_ref[docid][0]:
                 rank += 10
             if ' '.join(raw_q.lower()) in posting_id_ref[docid][0]:
