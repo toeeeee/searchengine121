@@ -1,12 +1,12 @@
 **dependencies:** \n
-NLTK: pip install --user -U nltk
-ujson: pip install ujson
-BS4: pip install bs4
-requests: pip install requests
+NLTK: pip install --user -U nltk \n
+ujson: pip install ujson \n
+BS4: pip install bs4 \n
+requests: pip install requests \n
 
-HOW TO USE:
+**HOW TO USE:**
 step 1. run main.py with folder of choice... it will take A LONG time....
-make sure there are no index.txts or hashes.db
-step 2. run run.py and search :)
 
-Group member's student ID #'s: 51886940,28685686,62616299,32303304
+make sure "index.txt" or "hashes.db" isn't already in the directory.
+
+step 2. run run.py and search :)
